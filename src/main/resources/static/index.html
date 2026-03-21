@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Tracker - Login</title>
+    <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+    <main class="auth-layout">
+        <section class="hero">
+            <h1>Movie Tracker</h1>
+            <p>Sign in to keep your movie tracking private and personal.</p>
+        </section>
+
+        <section class="forms" aria-label="Authentication form">
+            <article class="card single-card">
+                <h2>Login</h2>
+                <form id="login-form" novalidate>
+                    <label for="login-username">Username</label>
+                    <input id="login-username" name="username" type="text" required />
+
+                    <label for="login-password">Password</label>
+                    <input id="login-password" name="password" type="password" required />
+
+                    <button type="submit">Log in</button>
+                    <p id="login-message" class="message" aria-live="polite"></p>
+                </form>
+
+                <a class="secondary-button" href="/register.html">I don't have an account</a>
+            </article>
+        </section>
+    </main>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>
