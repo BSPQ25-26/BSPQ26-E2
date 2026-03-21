@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Tracker - Register</title>
+    <link rel="stylesheet" href="/css/auth.css" />
+</head>
+<body>
+    <main class="auth-layout">
+        <section class="hero">
+            <h1>Movie Tracker</h1>
+            <p>Create your account to start tracking movies privately.</p>
+        </section>
+
+        <section class="forms" aria-label="Registration form">
+            <article class="card single-card">
+                <h2>Create account</h2>
+                <form id="register-form" novalidate>
+                    <label for="register-username">Username</label>
+                    <input id="register-username" name="username" type="text" required minlength="3" />
+
+                    <label for="register-email">Email</label>
+                    <input id="register-email" name="email" type="email" required />
+
+                    <label for="register-password">Password</label>
+                    <input id="register-password" name="password" type="password" required minlength="6" />
+
+                    <button type="submit">Create account</button>
+                    <p id="register-message" class="message" aria-live="polite"></p>
+                </form>
+
+                <a class="secondary-button" href="/index.html">I already have an account</a>
+            </article>
+        </section>
+    </main>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>
