@@ -24,7 +24,23 @@ public class MovieController {
         }
         return ResponseEntity.ok(movieRepository.findAll());
     }
+    
+    @GetMapping
+    public ResponseEntity<List<Movie>> getMoviesByGenre(@RequestParam(required = true) String query) {
+        if (query != null && !query.isEmpty()) {
+        	return ResponseEntity.ok(movieRepository.findByGenre(query));
+        }
+        return ResponseEntity.ok(movieRepository.findAll());
+    }
 
+    @GetMapping
+    public ResponseEntity<List<Movie>> getMoviesByYear(@RequestParam(required = true) String query) {
+        if (query != null && !query.isEmpty()) {
+        	return ResponseEntity.ok(movieRepository.findByYear(Integer.parseInt(query)));
+        }
+        return ResponseEntity.ok(movieRepository.findAll());
+    }
+    
     @PostMapping
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
         return ResponseEntity.ok(movieRepository.save(movie));
