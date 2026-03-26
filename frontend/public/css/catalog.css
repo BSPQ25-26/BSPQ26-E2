@@ -1,0 +1,156 @@
+:root {
+    --bg: #f4efe8;
+    --ink: #1c1b1a;
+    --panel: #fff9f1;
+    --line: #e2d8cc;
+    --accent: #0e7a57;
+    --accent-strong: #0b5f43;
+    --danger: #b42318;
+    --ok: #0f7b44;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+    letter-spacing: -0.01em;
+}
+
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+    color: var(--ink);
+    background:
+        radial-gradient(circle at 20% 10%, #f9ddbe 0%, transparent 40%),
+        radial-gradient(circle at 80% 90%, #d2f1de 0%, transparent 35%),
+        var(--bg);
+    min-height: 100vh;
+}
+
+.catalog-layout {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 1rem 3rem;
+}
+
+.hero {
+    margin-bottom: 2rem;
+}
+
+.hero h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0;
+    color: var(--accent-strong);
+}
+
+.hero p {
+    margin-top: 0.75rem;
+    max-width: 60ch;
+    color: color-mix(in srgb, var(--ink) 80%, white);
+    font-size: 1.05rem;
+}
+
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    align-items: flex-end;
+    background: var(--panel);
+    padding: 1.5rem;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.control-title {
+    flex: 1 1 100%;
+    min-width: 0;
+}
+
+label {
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+input, select {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.65rem 0.75rem;
+    font-size: 1rem;
+    background: #fff;
+    color: var(--ink);
+    font-family: inherit;
+}
+
+input:focus, select:focus {
+    border-color: var(--accent);
+    outline: 2px solid color-mix(in srgb, var(--accent) 40%, white);
+    outline-offset: 1px;
+}
+
+.catalog-grid {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+}
+
+.movie-card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 1.5rem;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.movie-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.movie-card h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--ink);
+}
+
+.movie-card .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+}
+
+.movie-card .genre {
+    color: var(--accent-strong);
+    font-weight: 700;
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+}
+
+.movie-card .year {
+    color: color-mix(in srgb, var(--ink) 60%, white);
+    font-weight: 600;
+}
+
+.movie-card p {
+    margin: 0.5rem 0 0;
+    color: color-mix(in srgb, var(--ink) 85%, white);
+    line-height: 1.5;
+    font-size: 0.95rem;
+}
