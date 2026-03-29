@@ -24,11 +24,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class UserMovieStatusServiceTest {
 
-    @Mock UserMovieStatusRepository statusRepository;
-    @Mock UserRepository userRepository;
-    @Mock MovieRepository movieRepository;
+    @Mock
+    UserMovieStatusRepository statusRepository;
+    @Mock
+    UserRepository userRepository;
+    @Mock
+    MovieRepository movieRepository;
 
-    @InjectMocks UserMovieStatusService service;
+    @InjectMocks
+    UserMovieStatusService service;
 
     private User user;
     private Movie movie;
@@ -60,7 +64,7 @@ class UserMovieStatusServiceTest {
         when(statusRepository.save(any())).thenAnswer(i -> i.getArgument(0));
     }
 
-    //  Watch Later
+    // Watch Later
 
     @Test
     void saveForLater_setsWatchLater() {
@@ -110,6 +114,7 @@ class UserMovieStatusServiceTest {
     @Test
     void like_clearsDislike_mutualExclusivity() {
         UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
         existing.dislike();
         mockFindOrCreate(existing);
 
@@ -122,7 +127,8 @@ class UserMovieStatusServiceTest {
     @Test
     void dislike_clearsLike_mutualExclusivity() {
         UserMovieStatus existing = freshStatus();
-        existing.like(); 
+        existing.markAsWatched();
+        existing.like();
         mockFindOrCreate(existing);
 
         MovieStatusDTO dto = service.dislikeMovie(1L, 10L);
@@ -134,6 +140,7 @@ class UserMovieStatusServiceTest {
     @Test
     void removeLike_unsetsFlag() {
         UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
         existing.like();
         mockFindOrCreate(existing);
 
@@ -145,6 +152,7 @@ class UserMovieStatusServiceTest {
     @Test
     void removeDislike_unsetsFlag() {
         UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
         existing.dislike();
         mockFindOrCreate(existing);
 
@@ -153,7 +161,7 @@ class UserMovieStatusServiceTest {
         assertThat(dto.isDisliked()).isFalse();
     }
 
-    //  Get status
+    // Get status
 
     @Test
     void getStatus_returnsAllFalse_whenNoStatusExists() {
@@ -169,19 +177,73 @@ class UserMovieStatusServiceTest {
     }
 
     @Test
-    void canLikeAndSaveForLater_simultaneously() {
+    void markAsWatched_keepsHistory() {
         mockCreate();
-        // Save for later
-        service.saveForLater(1L, 10L);
+        MovieStatusDTO dto = service.markAsWatched(1L, 10L);
+        assertThat(dto.isWatched()).isTrue();
+    }
 
+    @Test
+    void saveForLater_remembersMovie() {
+        mockCreate();
+        MovieStatusDTO dto = service.saveForLater(1L, 10L);
+        assertThat(dto.isWatchLater()).isTrue();
+    }
+
+    @Test
+    void likeOrDislike_recordsPreference() {
         UserMovieStatus existing = freshStatus();
-        existing.saveForLater();
+        existing.markAsWatched();
+        mockFindOrCreate(existing);
+
+        MovieStatusDTO dtoLike = service.likeMovie(1L, 10L);
+        assertThat(dtoLike.isLiked()).isTrue();
+
+        MovieStatusDTO dtoDislike = service.dislikeMovie(1L, 10L);
+        assertThat(dtoDislike.isDisliked()).isTrue();
+    }
+
+    @Test
+    void rateMovie_onlyIfWatched_throwsIfNotWatched() {
+        UserMovieStatus existing = freshStatus();
+        // Not watched by default
+        when(statusRepository.findByUserIdAndMovieId(1L, 10L))
+                .thenReturn(Optional.of(existing));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.likeMovie(1L, 10L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot rate");
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.dislikeMovie(1L, 10L))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot rate");
+    }
+
+    @Test
+    void saveForLater_doesNotClearExistingLike() {
+        UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
         existing.like();
         mockFindOrCreate(existing);
 
-        // Both states can coexist
-        MovieStatusDTO dto = service.getStatus(1L, 10L);
-        assertThat(existing.isWatchLater()).isTrue();
-        assertThat(existing.isLiked()).isTrue();
+        MovieStatusDTO dto = service.saveForLater(1L, 10L);
+
+        assertThat(dto.isWatchLater()).isTrue();
+        assertThat(dto.isWatched()).isFalse();
+        assertThat(dto.isLiked()).isTrue(); // Like should be preserved
+    }
+
+    @Test
+    void markAsWatched_doesNotClearLike() {
+        UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
+        existing.like();
+        existing.saveForLater();
+        mockFindOrCreate(existing);
+        MovieStatusDTO dto = service.markAsWatched(1L, 10L);
+
+        assertThat(dto.isWatched()).isTrue();
+        assertThat(dto.isLiked()).isTrue();
+        assertThat(dto.isWatchLater()).isFalse();
     }
 }
