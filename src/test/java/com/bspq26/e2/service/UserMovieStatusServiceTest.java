@@ -224,8 +224,7 @@ class UserMovieStatusServiceTest {
         UserMovieStatus existing = freshStatus();
         existing.markAsWatched();
         existing.like();
-        when(statusRepository.findByUserIdAndMovieId(1L, 10L))
-            .thenReturn(Optional.of(existing));
+        mockFindOrCreate(existing);
 
         MovieStatusDTO dto = service.saveForLater(1L, 10L);
 
