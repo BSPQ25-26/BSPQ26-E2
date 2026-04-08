@@ -177,7 +177,8 @@ class UserMovieStatusServiceTest {
         UserMovieStatus existing = freshStatus();
         existing.saveForLater();
         existing.like();
-        mockFindOrCreate(existing);
+        when(statusRepository.findByUserIdAndMovieId(1L, 10L))
+            .thenReturn(Optional.of(existing));
 
         // Both states can coexist
         MovieStatusDTO dto = service.getStatus(1L, 10L);
