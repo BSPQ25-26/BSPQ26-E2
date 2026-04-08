@@ -7,4 +7,5 @@ import java.util.List;
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByTitleContainingIgnoreCase(String title);
     List<Movie> findByGenre(String genre);
+    List<Movie> findByYear(int year);
 }
