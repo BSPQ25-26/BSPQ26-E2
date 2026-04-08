@@ -60,11 +60,17 @@ public class UserMovieStatus {
     }
 
     public void like() {
+        if (!watched) {
+            throw new IllegalStateException("Cannot rate a movie that hasn't been watched");
+        }
         this.liked = true;
         this.disliked = false;
     }
 
     public void dislike() {
+        if (!watched) {
+            throw new IllegalStateException("Cannot rate a movie that hasn't been watched");
+        }
         this.disliked = true;
         this.liked = false;
     }
