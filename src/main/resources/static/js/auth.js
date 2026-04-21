@@ -3,6 +3,9 @@ const AUTH_ENDPOINTS = {
     login: "/api/auth/login"
 };
 
+const LOGIN_REDIRECT_URL = "/catalog.html";
+const AUTH_SESSION_KEY = "movieTracker.session";
+
 function setMessage(element, text, isSuccess) {
     element.textContent = text;
     element.classList.remove("error", "success");
@@ -26,6 +29,20 @@ async function postJson(url, body) {
     }
 
     return data;
+}
+
+function saveSession(username) {
+    try {
+        sessionStorage.setItem(
+            AUTH_SESSION_KEY,
+            JSON.stringify({
+                username,
+                loggedInAt: new Date().toISOString()
+            })
+        );
+    } catch (_) {
+        // Storage might be blocked in some browser/privacy modes.
+    }
 }
 
 function bindRegisterForm() {
@@ -85,7 +102,9 @@ function bindLoginForm() {
 
         try {
             const responseText = await postJson(AUTH_ENDPOINTS.login, payload);
-            setMessage(message, responseText, true);
+            saveSession(payload.username || "");
+            setMessage(message, `${responseText}. Redirecting...`, true);
+            window.location.assign(LOGIN_REDIRECT_URL);
         } catch (error) {
             setMessage(message, error.message, false);
         } finally {

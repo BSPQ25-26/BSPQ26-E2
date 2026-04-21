@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Tracker - Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="/auth.css" />
+</head>
+<body>
+    <main class="auth-layout">
+        <section class="hero">
+            <h1>Movie Tracker</h1>
+        </section>
+
+        <section class="forms" aria-label="Authentication form">
+            <article class="card single-card">
+                <h2>Login</h2>
+                <form id="login-form" novalidate>
+                    <label for="login-username">Username</label>
+                    <input id="login-username" name="username" type="text" required />
+
+                    <label for="login-password">Password</label>
+                    <input id="login-password" name="password" type="password" required />
+
+                    <button type="submit">Log in</button>
+                    <p id="login-message" class="message" aria-live="polite"></p>
+                </form>
+
+                <a class="secondary-button" href="/register.html">I don't have an account</a>
+            </article>
+        </section>
+    </main>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>
