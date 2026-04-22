@@ -3,8 +3,10 @@ const AUTH_ENDPOINTS = {
     login: "/api/auth/login"
 };
 
-const LOGIN_REDIRECT_URL = "/catalog.html";
-const AUTH_SESSION_KEY = "movieTracker.session";
+const USER_HOME_URL = "/catalog.html";
+const ADMIN_HOME_URL = "/admin-dashboard.html";
+const AUTH_SESSION_KEY = "movieTrakk.session";
+const LEGACY_AUTH_SESSION_KEY = "movieTracker.session";
 
 function setMessage(element, text, isSuccess) {
     element.textContent = text;
@@ -23,26 +25,40 @@ async function postJson(url, body) {
         body: JSON.stringify(body)
     });
 
-    const data = await response.text();
+    const contentType = response.headers.get("content-type") || "";
+    const data = contentType.includes("application/json")
+        ? await response.json()
+        : await response.text();
+
     if (!response.ok) {
-        throw new Error(data || "Request failed");
+        const errorMessage = typeof data === "string"
+            ? data
+            : (data.message || "Request failed");
+        throw new Error(errorMessage);
     }
 
     return data;
 }
 
-function saveSession(username) {
+function saveSession(username, role) {
     try {
+        sessionStorage.removeItem(LEGACY_AUTH_SESSION_KEY);
         sessionStorage.setItem(
             AUTH_SESSION_KEY,
             JSON.stringify({
                 username,
+                role: role || "USER",
                 loggedInAt: new Date().toISOString()
             })
         );
-    } catch (_) {
-        // Storage might be blocked in some browser/privacy modes.
+    } catch (_) {}
+}
+
+function resolveLoginRedirect(role) {
+    if (typeof role === "string" && role.trim().toUpperCase() === "ADMIN") {
+        return ADMIN_HOME_URL;
     }
+    return USER_HOME_URL;
 }
 
 function bindRegisterForm() {
@@ -101,10 +117,21 @@ function bindLoginForm() {
         setMessage(message, "Signing in...", true);
 
         try {
-            const responseText = await postJson(AUTH_ENDPOINTS.login, payload);
-            saveSession(payload.username || "");
-            setMessage(message, `${responseText}. Redirecting...`, true);
-            window.location.assign(LOGIN_REDIRECT_URL);
+            const responseData = await postJson(AUTH_ENDPOINTS.login, payload);
+            const serverMessage = typeof responseData === "string"
+                ? responseData
+                : (responseData.message || "Login successful");
+            const sessionUsername = typeof responseData === "object" && responseData.username
+                ? responseData.username
+                : (payload.username || "");
+            const sessionRole = typeof responseData === "object" && responseData.role
+                ? responseData.role
+                : "USER";
+            const redirectUrl = resolveLoginRedirect(sessionRole);
+
+            saveSession(sessionUsername, sessionRole);
+            setMessage(message, `${serverMessage}. Redirecting...`, true);
+            window.location.assign(redirectUrl);
         } catch (error) {
             setMessage(message, error.message, false);
         } finally {

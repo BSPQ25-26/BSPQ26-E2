@@ -19,6 +19,7 @@ public class SecurityConfig {
                     "/index.html",
                     "/register.html",
                     "/catalog.html",
+                    "/admin-dashboard.html",
                     "/auth.css",
                     "/css/**",
                     "/js/**",

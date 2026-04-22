@@ -3,72 +3,75 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Movie Tracker - Catalog</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <title>Catalog - MovieTrakk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/catalog.css" />
 </head>
-<body>
-    <main class="catalog-layout">
-        <section class="hero">
-            <h1>Catalog</h1>
-        </section>
+<body class="catalog-page">
+    <header class="top-nav">
+        <div class="brand-wrap">
+            <h1>MovieTrakk</h1>
+            <p>Premium movie catalog</p>
+        </div>
+        <div class="session-wrap">
+            <p class="session-line">Session: <strong id="session-user" data-session-user>Guest</strong></p>
+            <button type="button" class="nav-action" id="go-admin-dashboard" data-admin-link hidden>
+                <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
+                <span>Admin</span>
+            </button>
+            <button type="button" class="nav-action ghost" data-action="logout">Log out</button>
+        </div>
+    </header>
 
-        <section class="controls">
-            <div class="control-group control-title">
-                <label for="title">Title</label>
-                <input type="text" id="title" name="title" placeholder="Search by title..." />
+    <div class="catalog-layout">
+        <aside class="filter-panel" aria-label="Catalog filters">
+            <p class="label-caps">Search Controls</p>
+            <h2>Find the next screening</h2>
+
+            <label for="title">Title</label>
+            <div class="input-wrap">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input id="title" name="title" type="text" placeholder="Search by title..." />
             </div>
-            <div class="control-group">
-                <label for="genre">Genre</label>
+
+            <label for="genre">Genre</label>
+            <div class="input-wrap">
+                <span class="material-symbols-outlined" aria-hidden="true">theaters</span>
                 <select id="genre" name="genre">
-                    <option value="all" selected>All</option>
-                    <option value="comedy">Comedy</option>
-                    <option value="drama">Drama</option>
-                    <option value="sci-fi">Sci-Fi</option>
+                    <option value="all" selected>All genres</option>
+                    <option value="Action">Action</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Comedy">Comedy</option>
+                    <option value="Drama">Drama</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Noir">Noir</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Thriller">Thriller</option>
                 </select>
             </div>
-            <div class="control-group">
-                <label for="year">Year</label>
-                <input type="number" id="year" name="year" min="1800" max="2026" placeholder="e.g. 2024" />
-            </div>
-        </section>
 
-        <section class="catalog-grid" aria-label="Movie cards">
-            <article class="movie-card">
-                <h3>Inception</h3>
-                <div class="meta">
-                    <span class="genre">Sci-Fi</span>
-                    <span class="year">2010</span>
-                </div>
-                <p>Slick visual style, dream heist adventure.</p>
-            </article>
-            <article class="movie-card">
-                <h3>The Godfather</h3>
-                <div class="meta">
-                    <span class="genre">Drama</span>
-                    <span class="year">1972</span>
-                </div>
-                <p>Classic mafia story with deep character drama.</p>
-            </article>
-            <article class="movie-card">
-                <h3>Superbad</h3>
-                <div class="meta">
-                    <span class="genre">Comedy</span>
-                    <span class="year">2007</span>
-                </div>
-                <p>Fun, youthful comedy to lighten the mood.</p>
-            </article>
-            <article class="movie-card">
-                <h3>Interstellar</h3>
-                <div class="meta">
-                    <span class="genre">Sci-Fi</span>
-                    <span class="year">2014</span>
-                </div>
-                <p>Epic journey through space and family ties.</p>
-            </article>
-        </section>
-    </main>
+            <label for="year">Year</label>
+            <div class="input-wrap">
+                <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+                <input id="year" name="year" type="number" min="1800" max="2030" placeholder="e.g. 2024" />
+            </div>
+
+            <p id="catalog-message" class="message" aria-live="polite"></p>
+        </aside>
+
+        <main class="catalog-main">
+            <div class="main-head">
+                <h2>Movie Catalog</h2>
+                <p>Live data from the backend, styled with the new cinematic design system.</p>
+            </div>
+
+            <section id="catalog-grid" class="catalog-grid" aria-label="Movie cards"></section>
+        </main>
+    </div>
+
+    <script src="/js/catalog.js"></script>
 </body>
 </html>
