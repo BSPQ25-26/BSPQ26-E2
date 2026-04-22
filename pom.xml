@@ -5,7 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.bspq.e2</groupId>
-    <artifactId>BSPQ26-E2</artifactId>
+    <artifactId>MovieTrakk</artifactId>
+    <name>MovieTrakk</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
