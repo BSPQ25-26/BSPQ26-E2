@@ -24,3 +24,11 @@ hs_err_pid*
 replay_pid*
 
 *.env
+
+# Java build output
+target/
+
+# Local JavaScript test tooling
+node_modules/
+node/
+coverage/
