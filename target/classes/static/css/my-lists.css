@@ -1,0 +1,74 @@
+/* Tab buttons for list navigation */
+.list-tabs {
+    display: flex;
+    gap: 1rem;
+    padding: 2rem 1.5rem;
+    border-bottom: 1px solid var(--line-soft);
+    flex-wrap: wrap;
+}
+
+.tab-button {
+    padding: 0.75rem 1.5rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--text-soft);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: var(--background);
+    border-color: var(--primary);
+}
+
+/* Status message */
+.status-message {
+    padding: 1rem 1.5rem;
+    margin: 0;
+    font-size: 0.94rem;
+    border-radius: 0.5rem;
+    display: none;
+}
+
+.status-message.error {
+    display: block;
+    background: rgba(255, 180, 171, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 180, 171, 0.3);
+}
+
+.status-message.success {
+    display: block;
+    background: rgba(139, 232, 190, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(139, 232, 190, 0.3);
+}
+
+/* Loading indicator */
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Responsive design */
+@media (max-width: 640px) {
+    .list-tabs {
+        padding: 1.5rem 1rem;
+        gap: 0.5rem;
+    }
+
+    .tab-button {
+        padding: 0.5rem 1rem;
+        font-size: 0.88rem;
+    }
+}

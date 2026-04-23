@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - MovieTrakk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/auth.css" />
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <section class="brand-column" aria-label="Brand section">
+            <p class="label-caps">Create Your Profile</p>
+            <h1>Build Your MovieTrakk Profile</h1>
+            <p class="lead">Join the premium community and start collecting every movie that shapes your watchlist.</p>
+            <ul class="feature-list">
+                <li>
+                    <span class="material-symbols-outlined" aria-hidden="true">person_add</span>
+                    <span>Fast account setup</span>
+                </li>
+                <li>
+                    <span class="material-symbols-outlined" aria-hidden="true">playlist_add_check</span>
+                    <span>Personalized tracking workflow</span>
+                </li>
+                <li>
+                    <span class="material-symbols-outlined" aria-hidden="true">workspace_premium</span>
+                    <span>Premium visual experience</span>
+                </li>
+            </ul>
+        </section>
+
+        <section class="panel-column" aria-label="Registration form">
+            <article class="auth-card">
+                <p class="label-caps">New Member</p>
+                <h2>Create Account</h2>
+
+                <form id="register-form" novalidate>
+                    <label for="register-username">Username</label>
+                    <div class="field-wrap">
+                        <span class="material-symbols-outlined" aria-hidden="true">badge</span>
+                        <input id="register-username" name="username" type="text" minlength="3" autocomplete="username" required />
+                    </div>
+
+                    <label for="register-email">Email</label>
+                    <div class="field-wrap">
+                        <span class="material-symbols-outlined" aria-hidden="true">mail</span>
+                        <input id="register-email" name="email" type="email" autocomplete="email" required />
+                    </div>
+
+                    <label for="register-password">Password</label>
+                    <div class="field-wrap">
+                        <span class="material-symbols-outlined" aria-hidden="true">lock</span>
+                        <input id="register-password" name="password" type="password" minlength="6" autocomplete="new-password" required />
+                    </div>
+
+                    <button type="submit" class="primary-button">
+                        <span>Create account</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </button>
+                    <p id="register-message" class="message" aria-live="polite"></p>
+                </form>
+
+                <a class="secondary-button" href="/index.html">I already have an account</a>
+            </article>
+        </section>
+    </main>
+
+    <script src="/js/auth.js"></script>
+</body>
+</html>
