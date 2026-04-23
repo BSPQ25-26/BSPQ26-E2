@@ -30,11 +30,6 @@
         return Number.isNaN(parsed) ? 0 : parsed;
     }
 
-    function normalizeUserId(value) {
-        const parsed = Number.parseInt(String(value), 10);
-        return Number.isNaN(parsed) || parsed <= 0 ? null : parsed;
-    }
-
     function compareText(left, right) {
         return readText(left).localeCompare(readText(right), undefined, { sensitivity: "base" });
     }
@@ -83,18 +78,11 @@
         if (!scope.sessionStorage || !session) {
             return;
         }
-
-        const normalizedUserId = normalizeUserId(session.userId);
-        const sessionToStore = {
-            ...session,
-            userId: normalizedUserId
-        };
-
         try {
-            scope.sessionStorage.setItem(SESSION_KEY, JSON.stringify(sessionToStore));
+            scope.sessionStorage.setItem(SESSION_KEY, JSON.stringify(session));
             scope.sessionStorage.removeItem(LEGACY_SESSION_KEY);
-            if (normalizedUserId) {
-                scope.localStorage?.setItem(USER_ID_STORAGE_KEY, String(normalizedUserId));
+            if (session.userId) {
+                scope.localStorage?.setItem(USER_ID_STORAGE_KEY, String(session.userId));
             }
         } catch (_) {}
     }
@@ -105,7 +93,8 @@
             if (!saved) {
                 return null;
             }
-            return normalizeUserId(saved);
+            const parsed = Number.parseInt(saved, 10);
+            return Number.isNaN(parsed) ? null : parsed;
         } catch (_) {
             return null;
         }
@@ -116,16 +105,7 @@
             return null;
         }
 
-        const currentUserId = normalizeUserId(session.userId);
-        if (currentUserId) {
-            if (session.userId !== currentUserId) {
-                const normalizedSession = {
-                    ...session,
-                    userId: currentUserId
-                };
-                persistSession(normalizedSession);
-                return normalizedSession;
-            }
+        if (session.userId) {
             return session;
         }
 
@@ -372,7 +352,33 @@
                 createStatusActionButton("Like", "like", Boolean(movieStatus?.liked), !movieStatus?.watched),
                 createStatusActionButton("Dislike", "dislike", Boolean(movieStatus?.disliked), !movieStatus?.watched)
             );
-            body.append(statusActions);
+
+            const noteToggleWrap = document.createElement("div");
+            noteToggleWrap.className = "note-toggle-wrap";
+
+            const noteToggleButton = document.createElement("button");
+            noteToggleButton.type = "button";
+            noteToggleButton.className = "note-toggle-button";
+            noteToggleButton.setAttribute("aria-expanded", "false");
+            noteToggleButton.innerHTML = '<span class="material-symbols-outlined" aria-hidden="true">edit_note</span><span>Note</span>';
+
+            const noteEditor = document.createElement("div");
+            noteEditor.className = "note-editor is-hidden";
+
+            const noteInput = document.createElement("textarea");
+            noteInput.className = "note-input";
+            noteInput.maxLength = 1000;
+            noteInput.placeholder = "Add a personal note about this movie...";
+            noteInput.value = readText(movieStatus?.note);
+
+            const noteSaveButton = document.createElement("button");
+            noteSaveButton.type = "button";
+            noteSaveButton.className = "note-save-button";
+            noteSaveButton.textContent = "Save note";
+
+            noteToggleWrap.append(noteToggleButton);
+            noteEditor.append(noteInput, noteSaveButton);
+            body.append(statusActions, noteToggleWrap, noteEditor);
             applyMovieStatusToCard(card, movieStatus);
         }
 
@@ -1117,6 +1123,72 @@
             });
         } else {
             gridElement.addEventListener("click", async (event) => {
+                const noteToggleButton = event.target.closest(".note-toggle-button");
+                if (noteToggleButton) {
+                    const card = event.target.closest(".movie-card");
+                    const noteEditor = card?.querySelector(".note-editor");
+                    const noteInput = card?.querySelector(".note-input");
+                    if (!noteEditor || !noteInput) {
+                        return;
+                    }
+
+                    const shouldShow = noteEditor.classList.contains("is-hidden");
+                    noteEditor.classList.toggle("is-hidden", !shouldShow);
+                    card.classList.toggle("note-panel-open", shouldShow);
+                    noteToggleButton.setAttribute("aria-expanded", String(shouldShow));
+
+                    if (shouldShow) {
+                        noteInput.focus();
+                    }
+
+                    return;
+                }
+
+                const noteButton = event.target.closest(".note-save-button");
+                if (noteButton) {
+                    if (!state.userId) {
+                        setStatus(catalogMessage, "Log in again to save your movie notes.", true);
+                        return;
+                    }
+
+                    const card = event.target.closest(".movie-card");
+                    const movieId = Number.parseInt(card?.dataset.movieId || "", 10);
+                    const noteInput = card?.querySelector(".note-input");
+                    if (!movieId || !noteInput) {
+                        return;
+                    }
+
+                    const current = state.statusByMovieId[movieId] || normalizeMovieStatus(null, movieId);
+
+                    try {
+                        noteButton.disabled = true;
+                        const updated = normalizeMovieStatus(
+                            await saveMovieNote(state.userId, movieId, noteInput.value),
+                            movieId
+                        );
+                        state.statusByMovieId[movieId] = updated;
+                        applyMovieStatusToCard(card, updated);
+
+                        const noteEditor = card.querySelector(".note-editor");
+                        const toggleButton = card.querySelector(".note-toggle-button");
+                        if (noteEditor) {
+                            noteEditor.classList.add("is-hidden");
+                        }
+                        if (toggleButton) {
+                            toggleButton.setAttribute("aria-expanded", "false");
+                        }
+                        card.classList.remove("note-panel-open");
+                        setStatus(catalogMessage, "Note saved.", false);
+                    } catch (error) {
+                        applyMovieStatusToCard(card, current);
+                        setStatus(catalogMessage, error.message, true);
+                    } finally {
+                        noteButton.disabled = false;
+                    }
+
+                    return;
+                }
+
                 const button = event.target.closest(".status-action-button");
                 if (!button) {
                     return;

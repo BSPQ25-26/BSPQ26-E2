@@ -174,6 +174,27 @@ class UserMovieStatusServiceTest {
         assertThat(dto.isWatched()).isFalse();
         assertThat(dto.isLiked()).isFalse();
         assertThat(dto.isDisliked()).isFalse();
+        assertThat(dto.getNote()).isNull();
+    }
+
+    @Test
+    void updateNote_trimsAndStoresNote() {
+        mockCreate();
+
+        MovieStatusDTO dto = service.updateNote(1L, 10L, "  Great pacing and soundtrack.  ");
+
+        assertThat(dto.getNote()).isEqualTo("Great pacing and soundtrack.");
+    }
+
+    @Test
+    void updateNote_clearsNoteWhenBlank() {
+        UserMovieStatus existing = freshStatus();
+        existing.setNote("Old note");
+        mockFindOrCreate(existing);
+
+        MovieStatusDTO dto = service.updateNote(1L, 10L, "   ");
+
+        assertThat(dto.getNote()).isNull();
     }
 
     @Test

@@ -17,6 +17,8 @@ import java.util.Objects;
 @Transactional
 public class UserMovieStatusService {
 
+    private static final int MAX_NOTE_LENGTH = 1000;
+
     private final UserMovieStatusRepository statusRepository;
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
@@ -105,7 +107,13 @@ public class UserMovieStatusService {
     public MovieStatusDTO getStatus(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .map(this::toDTO)
-                .orElse(new MovieStatusDTO(movieId, false, false, false, false));
+                .orElse(new MovieStatusDTO(movieId, false, false, false, false, null));
+    }
+
+    public MovieStatusDTO updateNote(Long userId, Long movieId, String note) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.setNote(normalizeNote(note));
+        return toDTO(statusRepository.save(status));
     }
 
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
@@ -131,7 +139,25 @@ public class UserMovieStatusService {
                 s.isWatchLater(),
                 s.isWatched(),
                 s.isLiked(),
-                s.isDisliked()
+                s.isDisliked(),
+                s.getNote()
         );
+    }
+
+    private String normalizeNote(String note) {
+        if (note == null) {
+            return null;
+        }
+
+        String trimmed = note.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        if (trimmed.length() > MAX_NOTE_LENGTH) {
+            throw new IllegalArgumentException("Note must be 1000 characters or less");
+        }
+
+        return trimmed;
     }
 }
