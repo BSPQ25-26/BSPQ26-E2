@@ -11,6 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -117,5 +118,28 @@ class UserMovieStatusControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.movieId").value(10))
                 .andExpect(jsonPath("$.watchLater").value(true));
+    }
+
+    @Test
+    void rateMovie_returnsUpdatedStatus() throws Exception {
+        when(statusService.rateMovie(eq(1L), eq(10L), eq(4)))
+                .thenReturn(new MovieStatusDTO(10L, false, true, false, false, 4));
+
+        mockMvc.perform(post("/api/users/1/movies/10/status/rating")
+                        .contentType("application/json")
+                        .content("{\"rating\":4}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rating").value(4));
+    }
+
+    @Test
+    void rateMovie_returnsBadRequest_whenMovieNotWatched() throws Exception {
+        when(statusService.rateMovie(eq(1L), eq(10L), eq(4)))
+                .thenThrow(new IllegalStateException("Cannot rate a movie that hasn't been watched"));
+
+        mockMvc.perform(post("/api/users/1/movies/10/status/rating")
+                        .contentType("application/json")
+                        .content("{\"rating\":4}"))
+                .andExpect(status().isBadRequest());
     }
 }

@@ -83,6 +83,15 @@ public class UserMovieStatusService {
         return toDTO(statusRepository.save(status));
     }
 
+    public MovieStatusDTO rateMovie(Long userId, Long movieId, Integer rating) {
+        if (rating == null) {
+            throw new IllegalArgumentException("Rating is required");
+        }
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.rate(rating);
+        return toDTO(statusRepository.save(status));
+    }
+
     @Transactional(readOnly = true)
     public MovieStatusDTO getStatus(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
@@ -110,7 +119,8 @@ public class UserMovieStatusService {
                 s.isWatchLater(),
                 s.isWatched(),
                 s.isLiked(),
-                s.isDisliked()
+                s.isDisliked(),
+                s.getRating()
         );
     }
 }

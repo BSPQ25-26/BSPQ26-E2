@@ -104,6 +104,35 @@ class UserMovieStatusTest {
     }
 
     @Test
+    void rate_requiresWatchedMovie() {
+        UserMovieStatus status = new UserMovieStatus();
+
+        assertThatThrownBy(() -> status.rate(4))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot rate");
+    }
+
+    @Test
+    void rate_requiresValidRange() {
+        UserMovieStatus status = new UserMovieStatus();
+        status.markAsWatched();
+
+        assertThatThrownBy(() -> status.rate(0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("between 1 and 5");
+    }
+
+    @Test
+    void rate_setsNumericRating() {
+        UserMovieStatus status = new UserMovieStatus();
+        status.markAsWatched();
+
+        status.rate(5);
+
+        assertThat(status.getRating()).isEqualTo(5);
+    }
+
+    @Test
     void onUpdate_refreshesUpdatedAt() {
         UserMovieStatus status = new UserMovieStatus();
         var previous = status.getUpdatedAt();

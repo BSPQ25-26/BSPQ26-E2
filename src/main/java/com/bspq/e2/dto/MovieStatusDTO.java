@@ -7,6 +7,7 @@ public class MovieStatusDTO {
     private boolean watched;
     private boolean liked;
     private boolean disliked;
+    private Integer rating;
 
     public MovieStatusDTO() {}
 
@@ -19,15 +20,27 @@ public class MovieStatusDTO {
         this.disliked = disliked;
     }
 
+    public MovieStatusDTO(Long movieId, boolean watchLater, boolean watched,
+                          boolean liked, boolean disliked, Integer rating) {
+        this.movieId = movieId;
+        this.watchLater = watchLater;
+        this.watched = watched;
+        this.liked = liked;
+        this.disliked = disliked;
+        this.rating = rating;
+    }
+
     public Long getMovieId()          { return movieId; }
     public boolean isWatchLater()     { return watchLater; }
     public boolean isWatched()        { return watched; }
     public boolean isLiked()          { return liked; }
     public boolean isDisliked()       { return disliked; }
+    public Integer getRating()        { return rating; }
 
     public void setMovieId(Long movieId)       { this.movieId = movieId; }
     public void setWatchLater(boolean w)       { this.watchLater = w; }
     public void setWatched(boolean w)          { this.watched = w; }
     public void setLiked(boolean l)            { this.liked = l; }
     public void setDisliked(boolean d)         { this.disliked = d; }
+    public void setRating(Integer rating)      { this.rating = rating; }
 }

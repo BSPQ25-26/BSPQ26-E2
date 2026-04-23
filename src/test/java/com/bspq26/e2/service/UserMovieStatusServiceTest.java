@@ -246,4 +246,33 @@ class UserMovieStatusServiceTest {
         assertThat(dto.isLiked()).isTrue();
         assertThat(dto.isWatchLater()).isFalse();
     }
+
+    @Test
+    void rateMovie_setsRating_whenWatched() {
+        UserMovieStatus existing = freshStatus();
+        existing.markAsWatched();
+        mockFindOrCreate(existing);
+
+        MovieStatusDTO dto = service.rateMovie(1L, 10L, 4);
+
+        assertThat(dto.getRating()).isEqualTo(4);
+    }
+
+    @Test
+    void rateMovie_throws_whenNotWatched() {
+        UserMovieStatus existing = freshStatus();
+        when(statusRepository.findByUserIdAndMovieId(1L, 10L))
+                .thenReturn(Optional.of(existing));
+
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.rateMovie(1L, 10L, 3))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot rate");
+    }
+
+    @Test
+    void rateMovie_throws_whenRatingMissing() {
+        org.assertj.core.api.Assertions.assertThatThrownBy(() -> service.rateMovie(1L, 10L, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("required");
+    }
 }

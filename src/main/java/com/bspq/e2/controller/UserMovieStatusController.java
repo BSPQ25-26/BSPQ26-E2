@@ -1,9 +1,12 @@
 package com.bspq.e2.controller;
 
 import com.bspq.e2.dto.MovieStatusDTO;
+import com.bspq.e2.dto.MovieRatingRequest;
 import com.bspq.e2.service.UserMovieStatusService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -74,6 +77,18 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.removeDislike(userId, movieId));
+    }
+
+    @PostMapping("/{movieId}/status/rating")
+    public ResponseEntity<MovieStatusDTO> rateMovie(
+            @PathVariable Long userId,
+            @PathVariable Long movieId,
+            @RequestBody MovieRatingRequest request) {
+        try {
+            return ResponseEntity.ok(statusService.rateMovie(userId, movieId, request.getRating()));
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage(), ex);
+        }
     }
 
     //  Status

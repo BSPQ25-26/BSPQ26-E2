@@ -34,6 +34,9 @@ public class UserMovieStatus {
     @Column(name = "disliked", nullable = false)
     private boolean disliked = false;
 
+    @Column(name = "rating")
+    private Integer rating;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
@@ -78,6 +81,16 @@ public class UserMovieStatus {
     public void removeLike()    { this.liked = false; }
     public void removeDislike() { this.disliked = false; }
 
+    public void rate(int rating) {
+        if (!watched) {
+            throw new IllegalStateException("Cannot rate a movie that hasn't been watched");
+        }
+        if (rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Rating must be between 1 and 5");
+        }
+        this.rating = rating;
+    }
+
     public Long getId() { return id; }
 
     public User getUser() { return user; }
@@ -90,6 +103,7 @@ public class UserMovieStatus {
     public boolean isWatched()    { return watched; }
     public boolean isLiked()      { return liked; }
     public boolean isDisliked()   { return disliked; }
+    public Integer getRating()    { return rating; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }
