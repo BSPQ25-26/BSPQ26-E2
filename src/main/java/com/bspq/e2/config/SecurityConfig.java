@@ -14,9 +14,22 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/index.html", "/register.html", "/css/**", "/js/**", "/favicon.ico").permitAll()
+                .requestMatchers(
+                    "/",
+                    "/index.html",
+                    "/register.html",
+                    "/catalog.html",
+                    "/my-lists.html",
+                    "/admin-dashboard.html",
+                    "/auth.css",
+                    "/css/**",
+                    "/js/**",
+                    "/favicon.ico",
+                    "/error"
+                ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/movies/**").permitAll()
+                .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",

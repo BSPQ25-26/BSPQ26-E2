@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -44,11 +44,8 @@ public class UserMovieStatusService {
     }
 
     @Transactional(readOnly = true)
-    public List<MovieStatusDTO> getWatchLaterList(Long userId) {
-        return statusRepository.findByUserIdAndWatchLaterTrue(userId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public List<Movie> getWatchLaterList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndWatchLaterTrue(userId);
     }
 
     // Mark as Watched
@@ -56,6 +53,17 @@ public class UserMovieStatusService {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.markAsWatched();
         return toDTO(statusRepository.save(status));
+    }
+
+    public MovieStatusDTO removeFromWatched(Long userId, Long movieId) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.removeFromWatched();
+        return toDTO(statusRepository.save(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getWatchedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndWatchedTrue(userId);
     }
 
     // Like / Dislike
@@ -77,10 +85,20 @@ public class UserMovieStatusService {
         return toDTO(statusRepository.save(status));
     }
 
+    @Transactional(readOnly = true)
+    public List<Movie> getLikedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndLikedTrue(userId);
+    }
+
     public MovieStatusDTO removeDislike(Long userId, Long movieId) {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.removeDislike();
         return toDTO(statusRepository.save(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getDislikedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndDislikedTrue(userId);
     }
 
     @Transactional(readOnly = true)
@@ -93,10 +111,13 @@ public class UserMovieStatusService {
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-                    Movie movie = movieRepository.findById(movieId)
-                            .orElseThrow(() -> new RuntimeException("Movie not found: " + movieId));
+                Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                Long safeMovieId = Objects.requireNonNull(movieId, "movieId must not be null");
+
+                User user = userRepository.findById(safeUserId)
+                    .orElseThrow(() -> new RuntimeException("User not found: " + safeUserId));
+                Movie movie = movieRepository.findById(safeMovieId)
+                    .orElseThrow(() -> new RuntimeException("Movie not found: " + safeMovieId));
                     UserMovieStatus s = new UserMovieStatus();
                     s.setUser(user);
                     s.setMovie(movie);

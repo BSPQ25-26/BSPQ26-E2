@@ -1,6 +1,7 @@
 package com.bspq.e2.controller;
 
 import com.bspq.e2.dto.MovieStatusDTO;
+import com.bspq.e2.model.Movie;
 import com.bspq.e2.service.UserMovieStatusService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class UserMovieStatusController {
     }
 
     @GetMapping("/watch-later")
-    public ResponseEntity<List<MovieStatusDTO>> getWatchLaterList(
+    public ResponseEntity<List<Movie>> getWatchLaterList(
             @PathVariable Long userId) {
         return ResponseEntity.ok(statusService.getWatchLaterList(userId));
     }
@@ -44,6 +45,19 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.markAsWatched(userId, movieId));
+    }
+
+    @DeleteMapping("/{movieId}/status/watched")
+    public ResponseEntity<MovieStatusDTO> removeFromWatched(
+            @PathVariable Long userId,
+            @PathVariable Long movieId) {
+        return ResponseEntity.ok(statusService.removeFromWatched(userId, movieId));
+    }
+
+    @GetMapping("/watched")
+    public ResponseEntity<List<Movie>> getWatchedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getWatchedList(userId));
     }
 
     //  Like / Dislike
@@ -62,6 +76,12 @@ public class UserMovieStatusController {
         return ResponseEntity.ok(statusService.removeLike(userId, movieId));
     }
 
+    @GetMapping("/liked")
+    public ResponseEntity<List<Movie>> getLikedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getLikedList(userId));
+    }
+
     @PostMapping("/{movieId}/status/dislike")
     public ResponseEntity<MovieStatusDTO> dislikeMovie(
             @PathVariable Long userId,
@@ -74,6 +94,12 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.removeDislike(userId, movieId));
+    }
+
+    @GetMapping("/disliked")
+    public ResponseEntity<List<Movie>> getDislikedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getDislikedList(userId));
     }
 
     //  Status

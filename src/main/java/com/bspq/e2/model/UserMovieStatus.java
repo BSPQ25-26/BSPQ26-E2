@@ -59,6 +59,12 @@ public class UserMovieStatus {
         this.watchLater = false;
     }
 
+    public void removeFromWatched() {
+        this.watched = false;
+        this.liked = false;
+        this.disliked = false;
+    }
+
     public void like() {
         if (!watched) {
             throw new IllegalStateException("Cannot rate a movie that hasn't been watched");
