@@ -53,7 +53,7 @@ class UserMovieStatusServiceTest {
     private void mockFindOrCreate(UserMovieStatus existing) {
         when(statusRepository.findByUserIdAndMovieId(1L, 10L))
                 .thenReturn(Optional.of(existing));
-        when(statusRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(statusRepository.save(any(UserMovieStatus.class))).thenAnswer(i -> i.getArgument(0, UserMovieStatus.class));
     }
 
     private void mockCreate() {
@@ -61,7 +61,7 @@ class UserMovieStatusServiceTest {
                 .thenReturn(Optional.empty());
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(movieRepository.findById(10L)).thenReturn(Optional.of(movie));
-        when(statusRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(statusRepository.save(any(UserMovieStatus.class))).thenAnswer(i -> i.getArgument(0, UserMovieStatus.class));
     }
 
     // Watch Later
@@ -174,6 +174,27 @@ class UserMovieStatusServiceTest {
         assertThat(dto.isWatched()).isFalse();
         assertThat(dto.isLiked()).isFalse();
         assertThat(dto.isDisliked()).isFalse();
+        assertThat(dto.getNote()).isNull();
+    }
+
+    @Test
+    void updateNote_trimsAndStoresNote() {
+        mockCreate();
+
+        MovieStatusDTO dto = service.updateNote(1L, 10L, "  Great pacing and soundtrack.  ");
+
+        assertThat(dto.getNote()).isEqualTo("Great pacing and soundtrack.");
+    }
+
+    @Test
+    void updateNote_clearsNoteWhenBlank() {
+        UserMovieStatus existing = freshStatus();
+        existing.setNote("Old note");
+        mockFindOrCreate(existing);
+
+        MovieStatusDTO dto = service.updateNote(1L, 10L, "   ");
+
+        assertThat(dto.getNote()).isNull();
     }
 
     @Test

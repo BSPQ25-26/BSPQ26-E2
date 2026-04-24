@@ -11,11 +11,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class UserMovieStatusService {
+
+    private static final int MAX_NOTE_LENGTH = 1000;
 
     private final UserMovieStatusRepository statusRepository;
     private final UserRepository userRepository;
@@ -51,11 +54,27 @@ public class UserMovieStatusService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<Movie> getWatchLaterMovies(Long userId) {
+        return statusRepository.findMoviesByUserIdAndWatchLaterTrue(userId);
+    }
+
     // Mark as Watched
     public MovieStatusDTO markAsWatched(Long userId, Long movieId) {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.markAsWatched();
         return toDTO(statusRepository.save(status));
+    }
+
+    public MovieStatusDTO removeFromWatched(Long userId, Long movieId) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.removeFromWatched();
+        return toDTO(statusRepository.save(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getWatchedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndWatchedTrue(userId);
     }
 
     // Like / Dislike
@@ -77,6 +96,11 @@ public class UserMovieStatusService {
         return toDTO(statusRepository.save(status));
     }
 
+    @Transactional(readOnly = true)
+    public List<Movie> getLikedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndLikedTrue(userId);
+    }
+
     public MovieStatusDTO removeDislike(Long userId, Long movieId) {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.removeDislike();
@@ -84,19 +108,33 @@ public class UserMovieStatusService {
     }
 
     @Transactional(readOnly = true)
+    public List<Movie> getDislikedList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndDislikedTrue(userId);
+    }
+
+    @Transactional(readOnly = true)
     public MovieStatusDTO getStatus(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .map(this::toDTO)
-                .orElse(new MovieStatusDTO(movieId, false, false, false, false));
+                .orElse(new MovieStatusDTO(movieId, false, false, false, false, null));
+    }
+
+    public MovieStatusDTO updateNote(Long userId, Long movieId, String note) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.setNote(normalizeNote(note));
+        return toDTO(statusRepository.save(status));
     }
 
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .orElseGet(() -> {
-                    User user = userRepository.findById(userId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
-                    Movie movie = movieRepository.findById(movieId)
-                            .orElseThrow(() -> new RuntimeException("Movie not found: " + movieId));
+                    Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
+                    Long safeMovieId = Objects.requireNonNull(movieId, "movieId must not be null");
+
+                    User user = userRepository.findById(safeUserId)
+                            .orElseThrow(() -> new RuntimeException("User not found: " + safeUserId));
+                    Movie movie = movieRepository.findById(safeMovieId)
+                            .orElseThrow(() -> new RuntimeException("Movie not found: " + safeMovieId));
                     UserMovieStatus s = new UserMovieStatus();
                     s.setUser(user);
                     s.setMovie(movie);
@@ -110,7 +148,25 @@ public class UserMovieStatusService {
                 s.isWatchLater(),
                 s.isWatched(),
                 s.isLiked(),
-                s.isDisliked()
+                s.isDisliked(),
+                s.getNote()
         );
+    }
+
+    private String normalizeNote(String note) {
+        if (note == null) {
+            return null;
+        }
+
+        String trimmed = note.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        if (trimmed.length() > MAX_NOTE_LENGTH) {
+            throw new IllegalArgumentException("Note must be 1000 characters or less");
+        }
+
+        return trimmed;
     }
 }
