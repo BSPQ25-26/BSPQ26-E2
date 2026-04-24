@@ -34,7 +34,7 @@ public class UserMovieStatusController {
     }
 
     @GetMapping("/watch-later")
-    public ResponseEntity<List<MovieStatusDTO>> getWatchLaterList(
+    public ResponseEntity<List<Movie>> getWatchLaterList(
             @PathVariable Long userId) {
         return ResponseEntity.ok(statusService.getWatchLaterList(userId));
     }
@@ -116,20 +116,5 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.getStatus(userId, movieId));
-    }
-
-    @PutMapping("/{movieId}/status/note")
-    public ResponseEntity<MovieStatusDTO> updateNote(
-            @PathVariable Long userId,
-            @PathVariable Long movieId,
-            @RequestBody MovieNoteRequest request) {
-        return ResponseEntity.ok(statusService.updateNote(userId, movieId, request == null ? null : request.getNote()));
-    }
-
-    @DeleteMapping("/{movieId}/status/note")
-    public ResponseEntity<MovieStatusDTO> clearNote(
-            @PathVariable Long userId,
-            @PathVariable Long movieId) {
-        return ResponseEntity.ok(statusService.updateNote(userId, movieId, null));
     }
 }

@@ -1,0 +1,103 @@
+/* Keep My Lists content on the same right-side column as catalog cards */
+.catalog-layout > .catalog-main {
+    grid-column: 2;
+}
+
+.my-lists-panel {
+    display: grid;
+    gap: 0.8rem;
+    align-content: start;
+}
+
+.my-lists-panel h2 {
+    margin: 0.25rem 0 0;
+}
+
+.my-lists-panel p {
+    margin: 0;
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.list-tabs {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0;
+}
+
+.tab-button {
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--line-soft);
+    border-radius: 0.5rem;
+    background: transparent;
+    color: var(--text-soft);
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.tab-button.active {
+    background: var(--primary);
+    color: var(--background);
+    border-color: var(--primary);
+}
+
+.status-message,
+.message {
+    padding: 0.75rem 0.9rem;
+    margin: 0;
+    font-size: 0.88rem;
+    border-radius: 0.5rem;
+    display: none;
+}
+
+.status-message.error,
+.message.error {
+    display: block;
+    background: rgba(255, 180, 171, 0.1);
+    color: var(--danger);
+    border: 1px solid rgba(255, 180, 171, 0.3);
+}
+
+.status-message.success,
+.message.success {
+    display: block;
+    background: rgba(139, 232, 190, 0.1);
+    color: var(--success);
+    border: 1px solid rgba(139, 232, 190, 0.3);
+}
+
+.loading {
+    text-align: center;
+    padding: 3rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+@media (max-width: 640px) {
+    .list-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .tab-button {
+        width: auto;
+        text-align: center;
+        padding: 0.5rem 1rem;
+        font-size: 0.88rem;
+    }
+}
+
+@media (max-width: 980px) {
+    .catalog-layout > .catalog-main {
+        grid-column: auto;
+    }
+}

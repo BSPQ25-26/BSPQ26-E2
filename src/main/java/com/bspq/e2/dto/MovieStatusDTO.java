@@ -13,11 +13,6 @@ public class MovieStatusDTO {
 
     public MovieStatusDTO(Long movieId, boolean watchLater, boolean watched,
                         boolean liked, boolean disliked) {
-        this(movieId, watchLater, watched, liked, disliked, null);
-    }
-
-    public MovieStatusDTO(Long movieId, boolean watchLater, boolean watched,
-                        boolean liked, boolean disliked, String note) {
         this.movieId = movieId;
         this.watchLater = watchLater;
         this.watched = watched;

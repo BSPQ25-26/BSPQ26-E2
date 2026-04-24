@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -47,11 +46,8 @@ public class UserMovieStatusService {
     }
 
     @Transactional(readOnly = true)
-    public List<MovieStatusDTO> getWatchLaterList(Long userId) {
-        return statusRepository.findByUserIdAndWatchLaterTrue(userId)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public List<Movie> getWatchLaterList(Long userId) {
+        return statusRepository.findMoviesByUserIdAndWatchLaterTrue(userId);
     }
 
     @Transactional(readOnly = true)
@@ -128,13 +124,10 @@ public class UserMovieStatusService {
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .orElseGet(() -> {
-                    Long safeUserId = Objects.requireNonNull(userId, "userId must not be null");
-                    Long safeMovieId = Objects.requireNonNull(movieId, "movieId must not be null");
-
-                    User user = userRepository.findById(safeUserId)
-                            .orElseThrow(() -> new RuntimeException("User not found: " + safeUserId));
-                    Movie movie = movieRepository.findById(safeMovieId)
-                            .orElseThrow(() -> new RuntimeException("Movie not found: " + safeMovieId));
+                    User user = userRepository.findById(userId)
+                            .orElseThrow(() -> new RuntimeException("User not found: " + userId));
+                    Movie movie = movieRepository.findById(movieId)
+                            .orElseThrow(() -> new RuntimeException("Movie not found: " + movieId));
                     UserMovieStatus s = new UserMovieStatus();
                     s.setUser(user);
                     s.setMovie(movie);

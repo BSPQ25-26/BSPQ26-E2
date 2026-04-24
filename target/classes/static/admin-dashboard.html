@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard - MovieTrakk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;600;700;800;900&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/catalog.css" />
+</head>
+<body class="admin-page">
+    <aside class="admin-sidebar" aria-label="Admin navigation">
+        <div class="admin-sidebar-head">
+            <p class="label-caps">Management</p>
+            <h1>MovieTrakk</h1>
+            <span>Cinema Control</span>
+        </div>
+
+        <nav class="admin-side-nav">
+            <a class="active" href="#library" aria-current="page">
+                <span class="material-symbols-outlined" aria-hidden="true">movie</span>
+                <span>Movie Library</span>
+            </a>
+            <a href="/catalog.html">
+                <span class="material-symbols-outlined" aria-hidden="true">video_library</span>
+                <span>Catalog</span>
+            </a>
+        </nav>
+
+        <div class="admin-sidebar-foot">
+            <button type="button" class="admin-create-wide" data-admin-create data-admin-only>
+                <span class="material-symbols-outlined" aria-hidden="true">add</span>
+                <span>Add New Movie</span>
+            </button>
+            <button type="button" class="side-link" data-action="logout">
+                <span class="material-symbols-outlined" aria-hidden="true">logout</span>
+                <span>Log out</span>
+            </button>
+        </div>
+    </aside>
+
+    <header class="admin-topbar">
+        <a class="admin-mobile-brand" href="/admin-dashboard.html">MovieTrakk</a>
+        <div class="admin-global-search">
+            <span class="material-symbols-outlined" aria-hidden="true">search</span>
+            <input data-admin-search type="search" placeholder="Search movies..." autocomplete="off" />
+        </div>
+        <div class="session-wrap">
+            <p class="session-line">Session: <strong id="session-user" data-session-user>Guest</strong></p>
+            <a class="nav-action ghost" href="/catalog.html">
+                <span class="material-symbols-outlined" aria-hidden="true">arrow_back</span>
+                <span>Catalog</span>
+            </a>
+        </div>
+    </header>
+
+    <main class="admin-main" id="library">
+        <section class="admin-hero">
+            <div>
+                <p class="label-caps">Movie Library</p>
+                <h2>Manage the catalog</h2>
+                <p>Update metadata, curate posters, and keep the cinematic archive ready for every user.</p>
+            </div>
+            <button type="button" class="primary-command" data-admin-create data-admin-only>
+                <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                <span>Add New Movie</span>
+            </button>
+        </section>
+
+        <section class="admin-stat-grid" aria-label="Catalog summary">
+            <article class="stat-card">
+                <span class="material-symbols-outlined" aria-hidden="true">local_movies</span>
+                <div>
+                    <p>Total movies</p>
+                    <strong id="admin-total">0</strong>
+                </div>
+            </article>
+            <article class="stat-card">
+                <span class="material-symbols-outlined" aria-hidden="true">theaters</span>
+                <div>
+                    <p>Genres</p>
+                    <strong id="admin-genres">0</strong>
+                </div>
+            </article>
+            <article class="stat-card">
+                <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
+                <div>
+                    <p>Newest year</p>
+                    <strong id="admin-latest">N/A</strong>
+                </div>
+            </article>
+            <article class="stat-card">
+                <span class="material-symbols-outlined" aria-hidden="true">schedule</span>
+                <div>
+                    <p>Average runtime</p>
+                    <strong id="admin-average-duration">N/A</strong>
+                </div>
+            </article>
+        </section>
+
+        <section class="admin-toolbar" aria-label="Admin filters">
+            <label class="admin-search-field">
+                <span class="sr-only">Search movies</span>
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input id="admin-search" data-admin-search type="search" placeholder="Search by title, genre, synopsis..." autocomplete="off" />
+            </label>
+
+            <label class="admin-select-field">
+                <span>Genre</span>
+                <select id="admin-genre-filter">
+                    <option value="all">All genres</option>
+                </select>
+            </label>
+
+            <label class="admin-select-field">
+                <span>Year</span>
+                <input id="admin-year-filter" type="number" min="1800" max="2030" placeholder="Any year" />
+            </label>
+
+            <label class="admin-select-field">
+                <span>Sort</span>
+                <select id="admin-sort">
+                    <option value="title">Title A-Z</option>
+                    <option value="newest">Newest first</option>
+                    <option value="oldest">Oldest first</option>
+                    <option value="genre">Genre</option>
+                    <option value="duration">Runtime</option>
+                </select>
+            </label>
+
+            <button type="button" id="admin-clear-filters" class="icon-text-button">
+                <span class="material-symbols-outlined" aria-hidden="true">filter_alt_off</span>
+                <span>Clear</span>
+            </button>
+        </section>
+
+        <p id="catalog-message" class="message admin-message-line" aria-live="polite"></p>
+
+        <section class="admin-table-wrap" aria-label="Admin movie table">
+            <div class="admin-table-scroll">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Poster</th>
+                            <th>Title</th>
+                            <th>Genre</th>
+                            <th>Year</th>
+                            <th>Runtime</th>
+                            <th class="actions-column">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="admin-table-body"></tbody>
+                </table>
+            </div>
+            <footer class="admin-table-footer">
+                <span id="admin-range">No entries</span>
+                <div class="admin-pages" aria-label="Pagination">
+                    <button type="button" id="admin-prev" class="pager-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">chevron_left</span>
+                        <span class="sr-only">Previous page</span>
+                    </button>
+                    <div id="admin-page-list" class="page-list"></div>
+                    <button type="button" id="admin-next" class="pager-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">chevron_right</span>
+                        <span class="sr-only">Next page</span>
+                    </button>
+                </div>
+            </footer>
+        </section>
+    </main>
+
+    <section id="admin-modal" class="admin-modal hidden" aria-label="Movie editor" aria-hidden="true">
+        <div id="admin-overlay" class="admin-overlay"></div>
+        <article class="admin-modal-card" role="dialog" aria-modal="true" aria-labelledby="admin-modal-title">
+            <header class="admin-modal-head">
+                <div>
+                    <p class="label-caps" id="admin-mode-label">Movie details</p>
+                    <h3 id="admin-modal-title">Edit Movie</h3>
+                </div>
+                <button type="button" id="admin-close" class="round-icon-button" aria-label="Close editor">
+                    <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                </button>
+            </header>
+
+            <form id="admin-form" class="admin-form" novalidate>
+                <input type="hidden" id="admin-movie-id" />
+
+                <div class="poster-editor">
+                    <div class="poster-preview" aria-label="Poster preview">
+                        <img id="admin-poster-preview" alt="Movie poster preview" hidden />
+                        <span id="admin-poster-placeholder" class="material-symbols-outlined" aria-hidden="true">movie</span>
+                    </div>
+                    <div class="poster-fields">
+                        <label for="admin-poster-url">Poster URL</label>
+                        <input id="admin-poster-url" type="url" placeholder="https://example.com/poster.jpg" />
+
+                        <label for="admin-title">Title</label>
+                        <input id="admin-title" type="text" required minlength="1" />
+                    </div>
+                </div>
+
+                <div class="admin-form-grid">
+                    <div>
+                        <label for="admin-year">Year</label>
+                        <input id="admin-year" type="number" min="1800" max="2030" required />
+                    </div>
+                    <div>
+                        <label for="admin-duration">Duration (min)</label>
+                        <input id="admin-duration" type="number" min="1" required />
+                    </div>
+                    <div>
+                        <label for="admin-genre">Genre</label>
+                        <input id="admin-genre" type="text" required list="admin-genre-options" />
+                        <datalist id="admin-genre-options"></datalist>
+                    </div>
+                </div>
+
+                <label for="admin-synopsis">Synopsis</label>
+                <textarea id="admin-synopsis" rows="4" placeholder="Short plot summary"></textarea>
+
+                <p id="admin-message" class="message" aria-live="polite"></p>
+
+                <footer class="admin-modal-footer">
+                    <button type="button" id="admin-clear" class="icon-text-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">restart_alt</span>
+                        <span>Reset</span>
+                    </button>
+                    <button type="button" id="admin-cancel" class="icon-text-button">
+                        <span class="material-symbols-outlined" aria-hidden="true">close</span>
+                        <span>Cancel</span>
+                    </button>
+                    <button type="submit" class="primary-command">
+                        <span class="material-symbols-outlined" aria-hidden="true">save</span>
+                        <span>Save Movie</span>
+                    </button>
+                </footer>
+            </form>
+        </article>
+    </section>
+
+    <script src="/js/catalog.js"></script>
+</body>
+</html>
