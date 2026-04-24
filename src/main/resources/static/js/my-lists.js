@@ -7,8 +7,8 @@
     const ADMIN_DASHBOARD_URL = "/admin-dashboard.html";
     const LIST_ENDPOINTS = {
         watched: "watched",
-        "watch-later": "watch-later",
-        watchLater: "watch-later",
+        "watch-later": "watch-later/movies",
+        watchLater: "watch-later/movies",
         liked: "liked",
         disliked: "disliked"
     };
@@ -328,7 +328,7 @@
         return session;
     }
 
-    function showLoading(show = true) {
+    function showLoading(show) {
         const loading = document.getElementById("loading");
         if (loading) {
             loading.style.display = show ? "block" : "none";
@@ -347,8 +347,11 @@
             const data = await requestJson(endpoint);
             return Array.isArray(data) ? data : [];
         } catch (error) {
-            console.error(`Error loading ${listType} list:`, error);
-            setStatus(document.getElementById("status-message"), `Error loading ${listType} list: ${error?.message || "Unknown error"}`, true);
+            setStatus(
+                document.getElementById("status-message"),
+                `Error loading ${listType} list: ${error?.message || "Unknown error"}`,
+                true
+            );
             return [];
         } finally {
             showLoading(false);
@@ -360,13 +363,12 @@
         tabButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 const listType = button.dataset.listType;
-                if (!listType) return;
+                if (!listType) {
+                    return;
+                }
 
-                // Update active tab
-                tabButtons.forEach(btn => btn.classList.remove("active"));
+                tabButtons.forEach((tabButton) => tabButton.classList.remove("active"));
                 button.classList.add("active");
-
-                // Load and display the list
                 loadAndDisplayList(listType);
             });
         });
@@ -380,7 +382,7 @@
         }
 
         const movies = await loadMovieList(session.userId, listType);
-        const grid = document.getElementById("catalog-grid") || document.getElementById("movies-grid");
+        const grid = document.getElementById("catalog-grid");
         if (!grid) {
             setStatus(document.getElementById("status-message"), "Movies area not found in page.", true);
             return;
@@ -408,5 +410,4 @@
     } else {
         initPage();
     }
-
 })(window);

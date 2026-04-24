@@ -18,7 +18,7 @@ public class UserMovieStatusController {
     public UserMovieStatusController(UserMovieStatusService statusService) {
         this.statusService = statusService;
     }
-    //  Watch Later 
+    //  Watch Later
     @PostMapping("/{movieId}/status/watch-later")
     public ResponseEntity<MovieStatusDTO> saveForLater(
             @PathVariable Long userId,
@@ -37,6 +37,12 @@ public class UserMovieStatusController {
     public ResponseEntity<List<Movie>> getWatchLaterList(
             @PathVariable Long userId) {
         return ResponseEntity.ok(statusService.getWatchLaterList(userId));
+    }
+
+    @GetMapping("/watch-later/movies")
+    public ResponseEntity<List<Movie>> getWatchLaterMovies(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getWatchLaterMovies(userId));
     }
 
     //  Watched
@@ -110,20 +116,5 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.getStatus(userId, movieId));
-    }
-
-    @PutMapping("/{movieId}/status/note")
-    public ResponseEntity<MovieStatusDTO> updateNote(
-            @PathVariable Long userId,
-            @PathVariable Long movieId,
-            @RequestBody MovieNoteRequest request) {
-        return ResponseEntity.ok(statusService.updateNote(userId, movieId, request == null ? null : request.getNote()));
-    }
-
-    @DeleteMapping("/{movieId}/status/note")
-    public ResponseEntity<MovieStatusDTO> clearNote(
-            @PathVariable Long userId,
-            @PathVariable Long movieId) {
-        return ResponseEntity.ok(statusService.updateNote(userId, movieId, null));
     }
 }

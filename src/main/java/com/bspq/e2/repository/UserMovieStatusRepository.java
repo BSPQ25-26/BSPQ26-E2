@@ -20,18 +20,4 @@ public interface UserMovieStatusRepository extends JpaRepository<UserMovieStatus
     List<UserMovieStatus> findByUserIdAndWatchedTrue(Long userId);
 
     List<UserMovieStatus> findByUserIdAndLikedTrue(Long userId);
-
-    List<UserMovieStatus> findByUserIdAndDislikedTrue(Long userId);
-
-    @Query("select s.movie from UserMovieStatus s where s.user.id = :userId and s.watchLater = true")
-    List<Movie> findMoviesByUserIdAndWatchLaterTrue(@Param("userId") Long userId);
-
-    @Query("select s.movie from UserMovieStatus s where s.user.id = :userId and s.watched = true")
-    List<Movie> findMoviesByUserIdAndWatchedTrue(@Param("userId") Long userId);
-
-    @Query("select s.movie from UserMovieStatus s where s.user.id = :userId and s.liked = true")
-    List<Movie> findMoviesByUserIdAndLikedTrue(@Param("userId") Long userId);
-
-    @Query("select s.movie from UserMovieStatus s where s.user.id = :userId and s.disliked = true")
-    List<Movie> findMoviesByUserIdAndDislikedTrue(@Param("userId") Long userId);
 }
