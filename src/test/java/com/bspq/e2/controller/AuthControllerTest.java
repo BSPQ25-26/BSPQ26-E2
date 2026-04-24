@@ -19,6 +19,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -77,6 +78,7 @@ class AuthControllerTest {
     @Test
     void login_whenCredentialsAreValid_returnsMessageAndRole() throws Exception {
         User user = new User();
+        user.setId(7L);
         user.setUsername("admin");
         user.setPasswordHash("hash");
         user.setRole(User.Role.ADMIN);
@@ -93,6 +95,7 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Login successful"))
+                .andExpect(jsonPath("$.userId").value(7))
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.role").value("ADMIN"));
     }
@@ -116,5 +119,29 @@ class AuthControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.message").value("Invalid credentials"));
+    }
+
+    @Test
+    void resolveUser_whenUserExists_returnsUserInfo() throws Exception {
+        User user = new User();
+        user.setId(5L);
+        user.setUsername("miren");
+        user.setRole(User.Role.USER);
+
+        when(userRepository.findByUsername("miren")).thenReturn(Optional.of(user));
+
+        mockMvc.perform(get("/api/auth/resolve-user").param("username", "miren"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(5))
+                .andExpect(jsonPath("$.username").value("miren"))
+                .andExpect(jsonPath("$.role").value("USER"));
+    }
+
+    @Test
+    void resolveUser_whenUserDoesNotExist_returnsNotFound() throws Exception {
+        when(userRepository.findByUsername("missing")).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/auth/resolve-user").param("username", "missing"))
+                .andExpect(status().isNotFound());
     }
 }

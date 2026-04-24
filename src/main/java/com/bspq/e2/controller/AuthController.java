@@ -50,6 +50,7 @@ public class AuthController {
                     logger.info("Login successful for user: {}", u.getUsername());
                     return ResponseEntity.ok(Map.of(
                             "message", "Login successful",
+                            "userId", u.getId(),
                             "username", u.getUsername(),
                             "role", u.getRole() == null ? User.Role.USER.name() : u.getRole().name()
                     ));
@@ -58,5 +59,16 @@ public class AuthController {
                     logger.warn("Login failed for user: {}", request.getUsername());
                     return ResponseEntity.status(401).body(Map.of("message", "Invalid credentials"));
                 });
+    }
+
+    @GetMapping("/resolve-user")
+    public ResponseEntity<?> resolveUser(@RequestParam String username) {
+        return userRepository.findByUsername(username)
+                .map(u -> ResponseEntity.ok(Map.of(
+                        "userId", u.getId(),
+                        "username", u.getUsername(),
+                        "role", u.getRole() == null ? User.Role.USER.name() : u.getRole().name()
+                )))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
