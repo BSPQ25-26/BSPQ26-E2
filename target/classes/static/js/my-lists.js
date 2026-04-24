@@ -7,8 +7,13 @@
     const ADMIN_DASHBOARD_URL = "/admin-dashboard.html";
     const LIST_ENDPOINTS = {
         watched: "watched",
+<<<<<<< HEAD
         "watch-later": "watch-later",
         watchLater: "watch-later",
+=======
+        "watch-later": "watch-later/movies",
+        watchLater: "watch-later/movies",
+>>>>>>> origin/main
         liked: "liked",
         disliked: "disliked"
     };
@@ -328,7 +333,11 @@
         return session;
     }
 
+<<<<<<< HEAD
     function showLoading(show = true) {
+=======
+    function showLoading(show) {
+>>>>>>> origin/main
         const loading = document.getElementById("loading");
         if (loading) {
             loading.style.display = show ? "block" : "none";
@@ -347,8 +356,16 @@
             const data = await requestJson(endpoint);
             return Array.isArray(data) ? data : [];
         } catch (error) {
+<<<<<<< HEAD
             console.error(`Error loading ${listType} list:`, error);
             setStatus(document.getElementById("status-message"), `Error loading ${listType} list: ${error?.message || "Unknown error"}`, true);
+=======
+            setStatus(
+                document.getElementById("status-message"),
+                `Error loading ${listType} list: ${error?.message || "Unknown error"}`,
+                true
+            );
+>>>>>>> origin/main
             return [];
         } finally {
             showLoading(false);
@@ -360,6 +377,7 @@
         tabButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 const listType = button.dataset.listType;
+<<<<<<< HEAD
                 if (!listType) return;
 
                 // Update active tab
@@ -367,6 +385,14 @@
                 button.classList.add("active");
 
                 // Load and display the list
+=======
+                if (!listType) {
+                    return;
+                }
+
+                tabButtons.forEach((tabButton) => tabButton.classList.remove("active"));
+                button.classList.add("active");
+>>>>>>> origin/main
                 loadAndDisplayList(listType);
             });
         });
@@ -380,7 +406,11 @@
         }
 
         const movies = await loadMovieList(session.userId, listType);
+<<<<<<< HEAD
         const grid = document.getElementById("catalog-grid") || document.getElementById("movies-grid");
+=======
+        const grid = document.getElementById("catalog-grid");
+>>>>>>> origin/main
         if (!grid) {
             setStatus(document.getElementById("status-message"), "Movies area not found in page.", true);
             return;
@@ -408,5 +438,8 @@
     } else {
         initPage();
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/main
 })(window);
