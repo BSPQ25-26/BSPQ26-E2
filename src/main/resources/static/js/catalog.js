@@ -264,10 +264,8 @@
                 || (action === "dislike" && normalized.disliked);
 
             button.classList.toggle("active", Boolean(isActive));
-
-            const isRating = action === "like" || action === "dislike";
-            button.disabled = isRating && !watched;
-            button.title = isRating && !watched ? "Mark movie as watched to rate it" : "";
+            button.disabled = false;
+            button.title = "";
         });
 
         return normalized;

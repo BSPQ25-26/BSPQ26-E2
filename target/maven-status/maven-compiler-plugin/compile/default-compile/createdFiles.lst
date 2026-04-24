@@ -1,4 +1,5 @@
 com\bspq\e2\model\User.class
+com\bspq\e2\dto\MovieNoteRequest.class
 com\bspq\e2\dto\MovieStatusDTO.class
 com\bspq\e2\controller\UserMovieStatusController.class
 com\bspq\e2\service\UserMovieStatusService.class

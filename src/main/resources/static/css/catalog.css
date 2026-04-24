@@ -334,10 +334,26 @@ label {
     min-height: 2rem;
     border-radius: 0.45rem;
     border: 1px solid var(--line);
-    background: rgba(255, 255, 255, 0.04);
+    background: transparent;
+    color: var(--text-soft);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 140ms ease, border-color 140ms ease, color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+}
+
+.status-action-button:hover:not(.active) {
+    border-color: var(--primary);
+    color: var(--text);
+}
+
+.status-action-button.active {
     background: linear-gradient(120deg, var(--primary), var(--primary-bright));
     border-color: var(--primary);
     color: #2f2202;
+    box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
 }
 
 .status-action-button:disabled {
