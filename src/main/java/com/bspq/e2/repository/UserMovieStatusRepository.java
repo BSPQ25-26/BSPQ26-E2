@@ -20,4 +20,6 @@ public interface UserMovieStatusRepository extends JpaRepository<UserMovieStatus
     List<UserMovieStatus> findByUserIdAndWatchedTrue(Long userId);
 
     List<UserMovieStatus> findByUserIdAndLikedTrue(Long userId);
+
+    List<UserMovieStatus> findByUserIdAndDislikedTrue(Long userId);
 }

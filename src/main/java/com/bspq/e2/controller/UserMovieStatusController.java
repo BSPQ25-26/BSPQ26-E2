@@ -1,6 +1,5 @@
 package com.bspq.e2.controller;
 
-import com.bspq.e2.dto.MovieNoteRequest;
 import com.bspq.e2.dto.MovieStatusDTO;
 import com.bspq.e2.model.Movie;
 import com.bspq.e2.service.UserMovieStatusService;
@@ -34,7 +33,7 @@ public class UserMovieStatusController {
     }
 
     @GetMapping("/watch-later")
-    public ResponseEntity<List<Movie>> getWatchLaterList(
+    public ResponseEntity<List<MovieStatusDTO>> getWatchLaterList(
             @PathVariable Long userId) {
         return ResponseEntity.ok(statusService.getWatchLaterList(userId));
     }
@@ -116,5 +115,20 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.getStatus(userId, movieId));
+    }
+
+    @PutMapping("/{movieId}/status/note")
+    public ResponseEntity<MovieStatusDTO> updateNote(
+            @PathVariable Long userId,
+            @PathVariable Long movieId,
+            @RequestBody java.util.Map<String, String> payload) {
+        return ResponseEntity.ok(statusService.updateNote(userId, movieId, payload.get("note")));
+    }
+
+    @DeleteMapping("/{movieId}/status/note")
+    public ResponseEntity<MovieStatusDTO> clearNote(
+            @PathVariable Long userId,
+            @PathVariable Long movieId) {
+        return ResponseEntity.ok(statusService.updateNote(userId, movieId, null));
     }
 }

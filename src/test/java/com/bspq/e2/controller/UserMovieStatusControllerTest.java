@@ -32,7 +32,7 @@ class UserMovieStatusControllerTest {
     private UserMovieStatusService statusService;
 
     private MovieStatusDTO dto(long movieId, boolean watchLater, boolean watched, boolean liked, boolean disliked) {
-        return new MovieStatusDTO(movieId, watchLater, watched, liked, disliked);
+        return new MovieStatusDTO(movieId, watchLater, watched, liked, disliked, null);
     }
 
     private Movie movie(long id, String title) {

@@ -46,13 +46,17 @@ public class UserMovieStatusService {
     }
 
     @Transactional(readOnly = true)
-    public List<Movie> getWatchLaterList(Long userId) {
-        return statusRepository.findMoviesByUserIdAndWatchLaterTrue(userId);
+    public List<MovieStatusDTO> getWatchLaterList(Long userId) {
+        return statusRepository.findByUserIdAndWatchLaterTrue(userId).stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public List<Movie> getWatchLaterMovies(Long userId) {
-        return statusRepository.findMoviesByUserIdAndWatchLaterTrue(userId);
+        return statusRepository.findByUserIdAndWatchLaterTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     // Mark as Watched
@@ -70,7 +74,9 @@ public class UserMovieStatusService {
 
     @Transactional(readOnly = true)
     public List<Movie> getWatchedList(Long userId) {
-        return statusRepository.findMoviesByUserIdAndWatchedTrue(userId);
+        return statusRepository.findByUserIdAndWatchedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     // Like / Dislike
@@ -94,7 +100,9 @@ public class UserMovieStatusService {
 
     @Transactional(readOnly = true)
     public List<Movie> getLikedList(Long userId) {
-        return statusRepository.findMoviesByUserIdAndLikedTrue(userId);
+        return statusRepository.findByUserIdAndLikedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     public MovieStatusDTO removeDislike(Long userId, Long movieId) {
@@ -105,7 +113,9 @@ public class UserMovieStatusService {
 
     @Transactional(readOnly = true)
     public List<Movie> getDislikedList(Long userId) {
-        return statusRepository.findMoviesByUserIdAndDislikedTrue(userId);
+        return statusRepository.findByUserIdAndDislikedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
