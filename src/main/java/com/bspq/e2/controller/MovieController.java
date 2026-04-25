@@ -30,6 +30,13 @@ public class MovieController {
         }
         return ResponseEntity.ok(movieRepository.findAll());
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        return movieRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
     
     @GetMapping(params = "genre")
     public ResponseEntity<List<Movie>> getMoviesByGenre(@RequestParam String genre) {

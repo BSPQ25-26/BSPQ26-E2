@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie Details - MovieTrakk</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/catalog.css" />
+    <link rel="stylesheet" href="/css/movie-details.css" />
+</head>
+<body class="details-page">
+    <header class="top-nav">
+        <div class="brand-wrap">
+            <h1><a href="/catalog.html" style="color: inherit; text-decoration: none;">MovieTrakk</a></h1>
+            <p>Premium movie catalog</p>
+        </div>
+        <div class="session-wrap">
+            <p class="session-line">Session: <strong id="session-user">Guest</strong></p>
+            <a href="/catalog.html" class="nav-action ghost">
+                <span class="material-symbols-outlined" aria-hidden="true">movie</span>
+                <span>Catalog</span>
+            </a>
+            <a href="/my-lists.html" class="nav-action">
+                <span class="material-symbols-outlined" aria-hidden="true">library_add</span>
+                <span>My Lists</span>
+            </a>
+            <button type="button" class="nav-action ghost" id="btn-logout">Log out</button>
+        </div>
+    </header>
+
+    <div id="movie-content" style="display: none;">
+        <section class="hero-section">
+            <div class="hero-backdrop">
+                <img id="movie-backdrop" src="" alt="Backdrop" />
+            </div>
+            <div class="hero-overlay"></div>
+            
+            <div class="hero-content">
+                <div class="poster-wrap">
+                    <img id="movie-poster" src="" alt="Movie Poster" />
+                </div>
+                
+                <div class="info-wrap">
+                    <h1 id="movie-title">Movie Title</h1>
+                    
+                    <div class="meta-tags">
+                        <span class="meta-tag genre" id="movie-genre">Genre</span>
+                        <span class="meta-tag" id="movie-year">Year</span>
+                        <span class="meta-tag" id="movie-duration">0 min</span>
+                    </div>
+                    
+                    <p class="synopsis" id="movie-synopsis">
+                        Movie synopsis goes here. It provides a detailed overview of the film's plot, setting the stage for the user to decide if they want to watch it.
+                    </p>
+                    
+                    <div class="actions-bar" id="user-actions-bar" style="display: none;">
+                        <button class="action-btn" id="btn-watch-later" data-status="watch-later">
+                            <span class="material-symbols-outlined">schedule</span>
+                            Watch Later
+                        </button>
+                        <button class="action-btn" id="btn-watched" data-status="watched">
+                            <span class="material-symbols-outlined">visibility</span>
+                            Watched
+                        </button>
+                        <button class="action-btn" id="btn-like" data-status="like">
+                            <span class="material-symbols-outlined">thumb_up</span>
+                            Like
+                        </button>
+                        <button class="action-btn" id="btn-dislike" data-status="dislike">
+                            <span class="material-symbols-outlined">thumb_down</span>
+                            Dislike
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="details-content">
+            <aside class="sidebar">
+                <div class="note-section" id="note-section-container" style="display: none;">
+                    <h3>My Notes</h3>
+                    <textarea class="note-textarea" id="user-note" placeholder="Write your personal thoughts about this movie..."></textarea>
+                    <button class="save-note-btn" id="btn-save-note">Save Notes</button>
+                </div>
+            </aside>
+            <main>
+                <!-- Space for future content like cast, reviews, etc. -->
+            </main>
+        </div>
+    </div>
+
+    <div id="loading-state" style="padding: 4rem; text-align: center;">
+        <p>Loading movie details...</p>
+    </div>
+
+    <div id="error-state" style="display: none; padding: 4rem; text-align: center; color: var(--danger);">
+        <h2>Oops!</h2>
+        <p id="error-message">Movie not found.</p>
+        <a href="/catalog.html" class="nav-action" style="margin-top: 1rem;">Back to Catalog</a>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="/js/movie-details.js"></script>
+</body>
+</html>
