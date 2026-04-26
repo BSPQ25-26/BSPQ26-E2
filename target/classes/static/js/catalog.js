@@ -2,6 +2,7 @@
     const MOVIES_ENDPOINT = "/api/movies";
     const SESSION_KEY = "movieTrakk.session";
     const LEGACY_SESSION_KEY = "movieTracker.session";
+    const USER_ID_STORAGE_KEY = "movieTrakk.userId";
     const ADMIN_ROLE = "ADMIN";
     const LOGIN_PAGE_URL = "/index.html";
     const ADMIN_DASHBOARD_URL = "/admin-dashboard.html";
@@ -103,6 +104,145 @@
         return data;
     }
 
+    function normalizeUserId(value) {
+        const parsed = Number.parseInt(String(value), 10);
+        return Number.isNaN(parsed) || parsed <= 0 ? null : parsed;
+    }
+
+    function getStoredUserId() {
+        try {
+            return normalizeUserId(scope.localStorage?.getItem(USER_ID_STORAGE_KEY));
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function getUserId() {
+        const session = getSessionInfo();
+        const sessionUserId = normalizeUserId(session?.userId);
+        return sessionUserId || getStoredUserId();
+    }
+
+    function ensureUserId() {
+        const existing = getUserId();
+        if (existing) {
+            return existing;
+        }
+
+        const raw = scope.window?.prompt("Introduce tu userId para guardar el estado de la película:");
+        const userId = normalizeUserId(raw);
+        if (!userId) {
+            return null;
+        }
+
+        try {
+            scope.localStorage?.setItem(USER_ID_STORAGE_KEY, String(userId));
+        } catch (_) {}
+
+        return userId;
+    }
+
+    function createEmptyStatus(movieId) {
+        return {
+            movieId,
+            watchLater: false,
+            watched: false,
+            liked: false,
+            disliked: false
+        };
+    }
+
+    async function fetchStatusForMovie(userId, movieId) {
+        if (!userId) {
+            return createEmptyStatus(movieId);
+        }
+
+        try {
+            const status = await requestJson(`/api/users/${userId}/movies/${movieId}/status`);
+            return status && typeof status === "object" ? status : createEmptyStatus(movieId);
+        } catch (_) {
+            return createEmptyStatus(movieId);
+        }
+    }
+
+    function createStatusButton(label, action, active) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = `status-action-button${active ? " active" : ""}`;
+        button.dataset.action = action;
+        button.textContent = label;
+        return button;
+    }
+
+    function updateStatusButtonAvailability(actionsRoot, status) {
+        const canRate = Boolean(status && status.watched);
+        actionsRoot.querySelectorAll(".status-action-button[data-action='liked'], .status-action-button[data-action='disliked']")
+            .forEach((button) => {
+                button.disabled = !canRate;
+                button.title = canRate ? "" : "You can only rate watched movies";
+            });
+    }
+
+    function createStatusActions(status) {
+        const actions = document.createElement("div");
+        actions.className = "status-actions";
+        actions.append(
+            createStatusButton("Watched", "watched", Boolean(status.watched)),
+            createStatusButton("Watch Later", "watchLater", Boolean(status.watchLater)),
+            createStatusButton("Like", "liked", Boolean(status.liked)),
+            createStatusButton("Dislike", "disliked", Boolean(status.disliked))
+        );
+        updateStatusButtonAvailability(actions, status);
+        return actions;
+    }
+
+    function updateStatusButtons(card, status) {
+        const mapping = {
+            watched: Boolean(status.watched),
+            watchLater: Boolean(status.watchLater),
+            liked: Boolean(status.liked),
+            disliked: Boolean(status.disliked)
+        };
+
+        card.querySelectorAll(".status-action-button").forEach((button) => {
+            const active = Boolean(mapping[button.dataset.action]);
+            button.classList.toggle("active", active);
+        });
+
+        const actions = card.querySelector(".status-actions");
+        if (actions) {
+            updateStatusButtonAvailability(actions, status);
+        }
+    }
+
+    async function applyStatusAction(userId, movieId, action, isActive) {
+        if (action === "watched") {
+            return requestJson(`/api/users/${userId}/movies/${movieId}/status/watched`, {
+                method: isActive ? "DELETE" : "POST"
+            });
+        }
+
+        if (action === "watchLater") {
+            return requestJson(`/api/users/${userId}/movies/${movieId}/status/watch-later`, {
+                method: isActive ? "DELETE" : "POST"
+            });
+        }
+
+        if (action === "liked") {
+            return requestJson(`/api/users/${userId}/movies/${movieId}/status/like`, {
+                method: isActive ? "DELETE" : "POST"
+            });
+        }
+
+        if (action === "disliked") {
+            return requestJson(`/api/users/${userId}/movies/${movieId}/status/dislike`, {
+                method: isActive ? "DELETE" : "POST"
+            });
+        }
+
+        throw new Error("Unsupported action");
+    }
+
     function normalizeMoviePayload(movie) {
         return {
             title: readText(movie.title),
@@ -162,7 +302,10 @@
         return poster;
     }
 
-    function createMovieCard(movie, adminMode) {
+    function createMovieCard(movie, options = {}) {
+        const adminMode = Boolean(options.adminMode);
+        const showStatusButtons = Boolean(options.showStatusButtons);
+        const status = options.status || createEmptyStatus(movie.id);
         const card = document.createElement("article");
         card.className = "movie-card";
         card.dataset.movieId = String(movie.id);
@@ -194,6 +337,10 @@
         meta.append(genre, year, duration);
         body.append(title, meta, synopsis);
         card.append(createPosterElement(movie), body);
+
+        if (showStatusButtons) {
+            body.append(createStatusActions(status));
+        }
 
         if (adminMode) {
             const actions = document.createElement("div");
@@ -232,7 +379,11 @@
         }
 
         movies.forEach((movie) => {
-            gridElement.append(createMovieCard(movie, adminMode));
+            gridElement.append(createMovieCard(movie.movie || movie, {
+                adminMode,
+                showStatusButtons: !adminMode,
+                status: movie.status || createEmptyStatus(movie.movie?.id || movie.id)
+            }));
         });
     }
 
@@ -832,7 +983,16 @@
 
         async function reloadMovies() {
             try {
-                state.movies = await fetchMovies(state.filters);
+                const movies = await fetchMovies(state.filters);
+                const userId = getUserId();
+
+                state.movies = inlineAdminMode
+                    ? movies
+                    : await Promise.all((Array.isArray(movies) ? movies : []).map(async (movie) => ({
+                        movie,
+                        status: await fetchStatusForMovie(userId, movie.id)
+                    })));
+
                 renderMovies(gridElement, state.movies, inlineAdminMode);
                 setStatus(catalogMessage, "", false);
             } catch (error) {
@@ -855,6 +1015,41 @@
             state.filters.year = yearInput.value;
             reloadMovies();
         });
+
+        if (!inlineAdminMode) {
+            gridElement.addEventListener("click", async (event) => {
+                const button = event.target.closest(".status-action-button");
+                if (!button) {
+                    return;
+                }
+
+                const card = event.target.closest(".movie-card");
+                const movieId = Number.parseInt(card?.dataset.movieId || "", 10);
+                const action = button.dataset.action;
+                const isActive = button.classList.contains("active");
+
+                if (!movieId || !action) {
+                    return;
+                }
+
+                const userId = ensureUserId();
+                if (!userId) {
+                    setStatus(catalogMessage, "You need a userId to save movie states.", true);
+                    return;
+                }
+
+                try {
+                    button.disabled = true;
+                    const status = await applyStatusAction(userId, movieId, action, isActive);
+                    updateStatusButtons(card, status || createEmptyStatus(movieId));
+                    setStatus(catalogMessage, "Status updated successfully", false);
+                } catch (error) {
+                    setStatus(catalogMessage, error.message || "Error updating movie status", true);
+                } finally {
+                    button.disabled = false;
+                }
+            });
+        }
 
         if (inlineAdminMode) {
             gridElement.addEventListener("click", async (event) => {

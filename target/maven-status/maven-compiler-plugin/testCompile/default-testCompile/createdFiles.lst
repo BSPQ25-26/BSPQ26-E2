@@ -1,1 +1,6 @@
-com\bspq26\e2\service\UserMovieStatusServiceTest.class
+com\bspq\e2\model\UserMovieStatusTest.class
+com\bspq\e2\controller\MovieControllerTest.class
+com\bspq\e2\config\SecurityConfigTest.class
+com\bspq\e2\service\UserMovieStatusServiceTest.class
+com\bspq\e2\config\SecurityTestRoutes.class
+com\bspq\e2\controller\AuthControllerTest.class
