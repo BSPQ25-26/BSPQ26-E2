@@ -34,6 +34,8 @@ target/
 node_modules/
 node/
 coverage/
+artifacts/
+tools/
 
 # IDE and Editor settings
 .idea/
