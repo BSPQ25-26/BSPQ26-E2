@@ -34,8 +34,9 @@ target/
 node_modules/
 node/
 coverage/
-artifacts/
 tools/
+artifacts/visualvm/tmp/
+artifacts/visualvm/*.log
 
 # IDE and Editor settings
 .idea/
