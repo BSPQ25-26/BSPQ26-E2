@@ -98,6 +98,18 @@ powershell -ExecutionPolicy Bypass -File .\scripts\run-contiperf-failure.ps1
 powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1
 ```
 
+## Continuous Integration
+
+GitHub Actions runs the mandatory test suite on every push and pull request with:
+
+```bash
+mvn -B clean test
+```
+
+That command executes the Java/Spring tests, the Jest frontend tests and the configured coverage checks. ContiPerf remains a local/manual verification flow so the required CI check stays fast and stable.
+
+To require passing tests before merging pull requests, enable branch protection in GitHub under `Settings` -> `Branches` -> `Branch protection rules` and require the `Tests / test` status check.
+
 ### Test Categories
 
 | Category | Files | Description |
