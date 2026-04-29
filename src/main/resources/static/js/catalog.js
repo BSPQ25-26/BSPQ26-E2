@@ -217,6 +217,12 @@
             body.append(actions);
         }
 
+        card.addEventListener("click", (e) => {
+            if (e.target.closest("button")) return;
+            window.location.href = `/movie-details.html?id=${movie.id}`;
+        });
+        card.style.cursor = "pointer";
+
         return card;
     }
 

@@ -1,6 +1,7 @@
 package com.bspq.e2.controller;
 
 import com.bspq.e2.dto.MovieStatusDTO;
+import com.bspq.e2.model.Movie;
 import com.bspq.e2.dto.MovieRatingRequest;
 import com.bspq.e2.service.UserMovieStatusService;
 import org.springframework.http.HttpStatus;
@@ -19,7 +20,7 @@ public class UserMovieStatusController {
     public UserMovieStatusController(UserMovieStatusService statusService) {
         this.statusService = statusService;
     }
-    //  Watch Later 
+    //  Watch Later
     @PostMapping("/{movieId}/status/watch-later")
     public ResponseEntity<MovieStatusDTO> saveForLater(
             @PathVariable Long userId,
@@ -40,6 +41,12 @@ public class UserMovieStatusController {
         return ResponseEntity.ok(statusService.getWatchLaterList(userId));
     }
 
+    @GetMapping("/watch-later/movies")
+    public ResponseEntity<List<Movie>> getWatchLaterMovies(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getWatchLaterMovies(userId));
+    }
+
     //  Watched
 
     @PostMapping("/{movieId}/status/watched")
@@ -47,6 +54,19 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.markAsWatched(userId, movieId));
+    }
+
+    @DeleteMapping("/{movieId}/status/watched")
+    public ResponseEntity<MovieStatusDTO> removeFromWatched(
+            @PathVariable Long userId,
+            @PathVariable Long movieId) {
+        return ResponseEntity.ok(statusService.removeFromWatched(userId, movieId));
+    }
+
+    @GetMapping("/watched")
+    public ResponseEntity<List<Movie>> getWatchedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getWatchedList(userId));
     }
 
     //  Like / Dislike
@@ -65,6 +85,12 @@ public class UserMovieStatusController {
         return ResponseEntity.ok(statusService.removeLike(userId, movieId));
     }
 
+    @GetMapping("/liked")
+    public ResponseEntity<List<Movie>> getLikedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getLikedList(userId));
+    }
+
     @PostMapping("/{movieId}/status/dislike")
     public ResponseEntity<MovieStatusDTO> dislikeMovie(
             @PathVariable Long userId,
@@ -77,6 +103,12 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.removeDislike(userId, movieId));
+    }
+
+    @GetMapping("/disliked")
+    public ResponseEntity<List<Movie>> getDislikedList(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getDislikedList(userId));
     }
 
     @PostMapping("/{movieId}/status/rating")
@@ -98,5 +130,20 @@ public class UserMovieStatusController {
             @PathVariable Long userId,
             @PathVariable Long movieId) {
         return ResponseEntity.ok(statusService.getStatus(userId, movieId));
+    }
+
+    @PutMapping("/{movieId}/status/note")
+    public ResponseEntity<MovieStatusDTO> updateNote(
+            @PathVariable Long userId,
+            @PathVariable Long movieId,
+            @RequestBody java.util.Map<String, String> payload) {
+        return ResponseEntity.ok(statusService.updateNote(userId, movieId, payload.get("note")));
+    }
+
+    @DeleteMapping("/{movieId}/status/note")
+    public ResponseEntity<MovieStatusDTO> clearNote(
+            @PathVariable Long userId,
+            @PathVariable Long movieId) {
+        return ResponseEntity.ok(statusService.updateNote(userId, movieId, null));
     }
 }

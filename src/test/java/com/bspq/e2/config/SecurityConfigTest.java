@@ -42,11 +42,19 @@ class SecurityConfigTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("catalog"));
 
+        mockMvc.perform(get("/my-lists.html"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("my-lists"));
+
         mockMvc.perform(post("/api/movies/test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("movie"));
+
+        mockMvc.perform(get("/api/users/1/movies/watched"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("user-movies"));
     }
 
     @Test
@@ -65,9 +73,19 @@ class SecurityTestRoutes {
         return "catalog";
     }
 
+    @GetMapping("/my-lists.html")
+    String myListsPage() {
+        return "my-lists";
+    }
+
     @PostMapping("/api/movies/test")
     String createMovie() {
         return "movie";
+    }
+
+    @GetMapping("/api/users/1/movies/watched")
+    String userMovies() {
+        return "user-movies";
     }
 
     @GetMapping("/private-area")

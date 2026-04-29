@@ -24,79 +24,66 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Movie>> getMovies(
-            @RequestParam(required = false) String query,
-            @RequestParam(required = false) String genre,
-            @RequestParam(required = false) Integer year) {
-        logger.info("Fetching movies with filters - query: {}, genre: {}, year: {}", query, genre, year);
-        if (genre != null && !genre.isBlank()) {
-            return ResponseEntity.ok(movieRepository.findByGenre(genre));
-        }
-        if (year != null) {
-            return ResponseEntity.ok(movieRepository.findByYear(year));
-        }
-        if (query != null && !query.isBlank()) {
+    public ResponseEntity<List<Movie>> getAllMovies(@RequestParam(required = false) String query) {
+        if (query != null && !query.isEmpty()) {
             return ResponseEntity.ok(movieRepository.findByTitleContainingIgnoreCase(query));
+        }
+        return ResponseEntity.ok(movieRepository.findAll());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        return movieRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    @GetMapping(params = "genre")
+    public ResponseEntity<List<Movie>> getMoviesByGenre(@RequestParam String genre) {
+        if (genre != null && !genre.isEmpty()) {
+        	return ResponseEntity.ok(movieRepository.findByGenre(genre));
+        }
+        return ResponseEntity.ok(movieRepository.findAll());
+    }
+
+    @GetMapping(params = "year")
+    public ResponseEntity<List<Movie>> getMoviesByYear(@RequestParam String year) {
+        if (year != null && !year.isEmpty()) {
+        	return ResponseEntity.ok(movieRepository.findByYear(Integer.parseInt(year)));
         }
         return ResponseEntity.ok(movieRepository.findAll());
     }
     
     @PostMapping
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
-        Movie savedMovie = movieRepository.save(movie);
-        logger.info("Created movie with id {}", savedMovie.getId());
-        return ResponseEntity.ok(savedMovie);
+        return ResponseEntity.ok(movieRepository.save(movie));
     }
 
-    @PutMapping("/{movieId}")
-    public ResponseEntity<?> updateMovie(
-            @PathVariable Long movieId,
-            @RequestBody Movie movie,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!isAdmin(role)) {
-            logger.warn("Forbidden update attempt for movie {} with role {}", movieId, role);
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role, @RequestBody Movie movieDetails) {
+        if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");
         }
-
-        Optional<Movie> movieOptional = movieRepository.findById(movieId);
-        if (movieOptional.isEmpty()) {
-            logger.warn("Movie {} not found for update", movieId);
-            return ResponseEntity.notFound().build();
-        }
-
-        Movie existingMovie = movieOptional.get();
-        existingMovie.setTitle(movie.getTitle());
-        existingMovie.setYear(movie.getYear());
-        existingMovie.setGenre(movie.getGenre());
-        existingMovie.setDuration(movie.getDuration());
-        existingMovie.setSynopsis(movie.getSynopsis());
-        existingMovie.setPosterUrl(movie.getPosterUrl());
-
-        Movie updatedMovie = movieRepository.save(existingMovie);
-        logger.info("Updated movie with id {}", movieId);
-        return ResponseEntity.ok(updatedMovie);
+        return movieRepository.findById(id).map(movie -> {
+            movie.setTitle(movieDetails.getTitle());
+            movie.setGenre(movieDetails.getGenre());
+            movie.setYear(movieDetails.getYear());
+            movie.setDuration(movieDetails.getDuration());
+            movie.setSynopsis(movieDetails.getSynopsis());
+            movie.setPosterUrl(movieDetails.getPosterUrl());
+            return ResponseEntity.ok(movieRepository.save(movie));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("/{movieId}")
-    public ResponseEntity<?> deleteMovie(
-            @PathVariable Long movieId,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
-        if (!isAdmin(role)) {
-            logger.warn("Forbidden delete attempt for movie {} with role {}", movieId, role);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role) {
+        if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");
         }
-
-        if (!movieRepository.existsById(movieId)) {
-            logger.warn("Movie {} not found for delete", movieId);
+        if (!movieRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
-        movieRepository.deleteById(movieId);
-        logger.info("Deleted movie with id {}", movieId);
+        movieRepository.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    private boolean isAdmin(String role) {
-        return role != null && ADMIN_ROLE.equalsIgnoreCase(role.trim());
     }
 }

@@ -7,6 +7,7 @@ const USER_HOME_URL = "/catalog.html";
 const ADMIN_HOME_URL = "/admin-dashboard.html";
 const AUTH_SESSION_KEY = "movieTrakk.session";
 const LEGACY_AUTH_SESSION_KEY = "movieTracker.session";
+const USER_ID_STORAGE_KEY = "movieTrakk.userId";
 
 function setMessage(element, text, isSuccess) {
     element.textContent = text;
@@ -31,26 +32,30 @@ async function postJson(url, body) {
         : await response.text();
 
     if (!response.ok) {
-        const errorMessage = typeof data === "string"
+        const message = typeof data === "string"
             ? data
             : (data.message || "Request failed");
-        throw new Error(errorMessage);
+        throw new Error(message || "Request failed");
     }
 
     return data;
 }
 
-function saveSession(username, role) {
+function saveSession(userId, username, role) {
     try {
         sessionStorage.removeItem(LEGACY_AUTH_SESSION_KEY);
         sessionStorage.setItem(
             AUTH_SESSION_KEY,
             JSON.stringify({
+                userId,
                 username,
                 role: role || "USER",
                 loggedInAt: new Date().toISOString()
             })
         );
+        if (userId) {
+            localStorage.setItem(USER_ID_STORAGE_KEY, String(userId));
+        }
     } catch (_) {}
 }
 
@@ -124,12 +129,15 @@ function bindLoginForm() {
             const sessionUsername = typeof responseData === "object" && responseData.username
                 ? responseData.username
                 : (payload.username || "");
+            const sessionUserId = typeof responseData === "object" && responseData.userId
+                ? responseData.userId
+                : null;
             const sessionRole = typeof responseData === "object" && responseData.role
                 ? responseData.role
                 : "USER";
             const redirectUrl = resolveLoginRedirect(sessionRole);
 
-            saveSession(sessionUsername, sessionRole);
+            saveSession(sessionUserId, sessionUsername, sessionRole);
             setMessage(message, `${serverMessage}. Redirecting...`, true);
             window.location.assign(redirectUrl);
         } catch (error) {

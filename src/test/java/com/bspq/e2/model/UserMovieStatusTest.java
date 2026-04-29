@@ -40,6 +40,19 @@ class UserMovieStatusTest {
     }
 
     @Test
+    void removeFromWatched_unsetsWatchedAndRatings() {
+        UserMovieStatus status = new UserMovieStatus();
+        status.markAsWatched();
+        status.like();
+
+        status.removeFromWatched();
+
+        assertThat(status.isWatched()).isFalse();
+        assertThat(status.isLiked()).isFalse();
+        assertThat(status.isDisliked()).isFalse();
+    }
+
+    @Test
     void like_requiresWatchedMovie() {
         UserMovieStatus status = new UserMovieStatus();
 
@@ -101,6 +114,15 @@ class UserMovieStatusTest {
         status.removeDislike();
 
         assertThat(status.isDisliked()).isFalse();
+    }
+
+    @Test
+    void note_canBeStoredAndRead() {
+        UserMovieStatus status = new UserMovieStatus();
+
+        status.setNote("Remember the ending");
+
+        assertThat(status.getNote()).isEqualTo("Remember the ending");
     }
 
     @Test

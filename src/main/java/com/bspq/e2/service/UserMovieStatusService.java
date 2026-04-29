@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class UserMovieStatusService {
 
+    private static final int MAX_NOTE_LENGTH = 1000;
+
     private final UserMovieStatusRepository statusRepository;
     private final UserRepository userRepository;
     private final MovieRepository movieRepository;
@@ -45,9 +47,15 @@ public class UserMovieStatusService {
 
     @Transactional(readOnly = true)
     public List<MovieStatusDTO> getWatchLaterList(Long userId) {
-        return statusRepository.findByUserIdAndWatchLaterTrue(userId)
-                .stream()
+        return statusRepository.findByUserIdAndWatchLaterTrue(userId).stream()
                 .map(this::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getWatchLaterMovies(Long userId) {
+        return statusRepository.findByUserIdAndWatchLaterTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
                 .collect(Collectors.toList());
     }
 
@@ -56,6 +64,19 @@ public class UserMovieStatusService {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.markAsWatched();
         return toDTO(statusRepository.save(status));
+    }
+
+    public MovieStatusDTO removeFromWatched(Long userId, Long movieId) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.removeFromWatched();
+        return toDTO(statusRepository.save(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getWatchedList(Long userId) {
+        return statusRepository.findByUserIdAndWatchedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     // Like / Dislike
@@ -77,10 +98,24 @@ public class UserMovieStatusService {
         return toDTO(statusRepository.save(status));
     }
 
+    @Transactional(readOnly = true)
+    public List<Movie> getLikedList(Long userId) {
+        return statusRepository.findByUserIdAndLikedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
+    }
+
     public MovieStatusDTO removeDislike(Long userId, Long movieId) {
         UserMovieStatus status = getOrCreate(userId, movieId);
         status.removeDislike();
         return toDTO(statusRepository.save(status));
+    }
+
+    @Transactional(readOnly = true)
+    public List<Movie> getDislikedList(Long userId) {
+        return statusRepository.findByUserIdAndDislikedTrue(userId).stream()
+                .map(UserMovieStatus::getMovie)
+                .collect(Collectors.toList());
     }
 
     public MovieStatusDTO rateMovie(Long userId, Long movieId, Integer rating) {
@@ -96,7 +131,13 @@ public class UserMovieStatusService {
     public MovieStatusDTO getStatus(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
                 .map(this::toDTO)
-                .orElse(new MovieStatusDTO(movieId, false, false, false, false));
+                .orElse(new MovieStatusDTO(movieId, false, false, false, false, (String) null, null));
+    }
+
+    public MovieStatusDTO updateNote(Long userId, Long movieId, String note) {
+        UserMovieStatus status = getOrCreate(userId, movieId);
+        status.setNote(normalizeNote(note));
+        return toDTO(statusRepository.save(status));
     }
 
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
@@ -120,7 +161,25 @@ public class UserMovieStatusService {
                 s.isWatched(),
                 s.isLiked(),
                 s.isDisliked(),
+                s.getNote(),
                 s.getRating()
         );
+    }
+
+    private String normalizeNote(String note) {
+        if (note == null) {
+            return null;
+        }
+
+        String trimmed = note.trim();
+        if (trimmed.isEmpty()) {
+            return null;
+        }
+
+        if (trimmed.length() > MAX_NOTE_LENGTH) {
+            throw new IllegalArgumentException("Note must be 1000 characters or less");
+        }
+
+        return trimmed;
     }
 }

@@ -1,8 +1,9 @@
 # Compiled class file
 *.class
 
-# Log file
+# Log files
 *.log
+startup_log.txt
 
 # BlueJ files
 *.ctxt
@@ -23,6 +24,7 @@
 hs_err_pid*
 replay_pid*
 
+# Secrets
 *.env
 
 # Java build output
@@ -32,3 +34,11 @@ target/
 node_modules/
 node/
 coverage/
+
+# IDE and Editor settings
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath

@@ -34,6 +34,9 @@ public class UserMovieStatus {
     @Column(name = "disliked", nullable = false)
     private boolean disliked = false;
 
+    @Column(name = "note", length = 1000)
+    private String note;
+
     @Column(name = "rating")
     private Integer rating;
 
@@ -60,6 +63,12 @@ public class UserMovieStatus {
     public void markAsWatched() {
         this.watched = true;
         this.watchLater = false;
+    }
+
+    public void removeFromWatched() {
+        this.watched = false;
+        this.liked = false;
+        this.disliked = false;
     }
 
     public void like() {
@@ -103,6 +112,9 @@ public class UserMovieStatus {
     public boolean isWatched()    { return watched; }
     public boolean isLiked()      { return liked; }
     public boolean isDisliked()   { return disliked; }
+    public String getNote()       { return note; }
+
+    public void setNote(String note) { this.note = note; }
     public Integer getRating()    { return rating; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }

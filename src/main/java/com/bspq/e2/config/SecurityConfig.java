@@ -19,6 +19,8 @@ public class SecurityConfig {
                     "/index.html",
                     "/register.html",
                     "/catalog.html",
+                    "/my-lists.html",
+                    "/movie-details.html",
                     "/admin-dashboard.html",
                     "/auth.css",
                     "/css/**",
@@ -28,6 +30,7 @@ public class SecurityConfig {
                 ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/movies/**").permitAll()
+                .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",
