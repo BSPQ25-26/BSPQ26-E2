@@ -25,4 +25,11 @@ public interface UserMovieStatusRepository extends JpaRepository<UserMovieStatus
 
     @EntityGraph(attributePaths = {"movie"})
     List<UserMovieStatus> findByUserIdAndDislikedTrue(Long userId);
+    
+    List<UserMovieStatus> findByUserId(Long userId);
+
+    List<UserMovieStatus> findByUserIdNot(Long userId);
+
+    @EntityGraph(attributePaths = {"movie"})
+    List<UserMovieStatus> findByLikedTrue();
 }
