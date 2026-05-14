@@ -19,6 +19,7 @@
 
     <properties>
         <java.version>21</java.version>
+        <skip.frontend>true</skip.frontend>
     </properties>
 
     <dependencies>
@@ -146,7 +147,8 @@
                 <artifactId>frontend-maven-plugin</artifactId>
                 <version>1.15.1</version>
                 <configuration>
-                    <workingDirectory>${project.basedir}</workingDirectory>
+                    <skip>${skip.frontend}</skip>
+                    <workingDirectory>${project.basedir}/frontend</workingDirectory>
                     <installDirectory>${project.build.directory}</installDirectory>
                 </configuration>
                 <executions>

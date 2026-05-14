@@ -62,16 +62,17 @@ class UserMovieStatusControllerTest {
     }
 
     @Test
-    void getWatchLaterList_returnsMovieList() throws Exception {
+    void getWatchLaterList_returnsWatchLaterStatusList() throws Exception {
         when(statusService.getWatchLaterList(1L)).thenReturn(List.of(
-                movie(10L, "Interstellar"),
-                movie(11L, "Arrival")
+                dto(10L, true, false, false, false),
+                dto(11L, true, false, false, false)
         ));
 
         mockMvc.perform(get("/api/users/1/movies/watch-later"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(10))
-                .andExpect(jsonPath("$[1].title").value("Arrival"));
+                .andExpect(jsonPath("$[0].movieId").value(10))
+                .andExpect(jsonPath("$[1].movieId").value(11))
+                .andExpect(jsonPath("$[0].watchLater").value(true));
     }
 
     @Test
