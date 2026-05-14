@@ -1,6 +1,7 @@
 package com.bspq.e2.performance;
 
 import com.bspq.e2.dto.MovieStatusDTO;
+import com.bspq.e2.dto.UserStatsDTO;
 import com.bspq.e2.model.Movie;
 import com.bspq.e2.model.User;
 import com.bspq.e2.model.UserMovieStatus;
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,6 +46,27 @@ class UserMovieStatusServiceTest {
     }
 
     private UserMovieStatus freshStatus() {
+        UserMovieStatus s = new UserMovieStatus();
+        s.setUser(user);
+        s.setMovie(movie);
+        return s;
+    }
+
+    private Movie makeMovie(Long id, String title, String genre, int duration) {
+        return makeMovie(id, title, genre, 0, duration);
+    }
+
+    private Movie makeMovie(Long id, String title, String genre, int year, int duration) {
+        Movie m = new Movie();
+        m.setId(id);
+        m.setTitle(title);
+        m.setGenre(genre);
+        m.setYear(year);
+        m.setDuration(duration);
+        return m;
+    }
+
+    private UserMovieStatus statusFor(Movie movie) {
         UserMovieStatus s = new UserMovieStatus();
         s.setUser(user);
         s.setMovie(movie);
@@ -197,6 +220,35 @@ class UserMovieStatusServiceTest {
         MovieStatusDTO dto = service.updateNote(1L, 10L, "   ");
 
         assertThat(dto.getNote()).isNull();
+    }
+
+    @Test
+    void getUserStats_aggregatesWatchedRuntimeAndPreferences() {
+        Movie watchedLikedMovie = makeMovie(10L, "Arrival", "Sci-Fi", 116);
+        Movie watchedDislikedMovie = makeMovie(11L, "Cats", "Musical", 110);
+        Movie laterMovie = makeMovie(12L, "Heat", "Crime", 170);
+
+        UserMovieStatus watchedLiked = statusFor(watchedLikedMovie);
+        watchedLiked.markAsWatched();
+        watchedLiked.like();
+
+        UserMovieStatus watchedDisliked = statusFor(watchedDislikedMovie);
+        watchedDisliked.markAsWatched();
+        watchedDisliked.dislike();
+
+        UserMovieStatus watchLater = statusFor(laterMovie);
+        watchLater.saveForLater();
+
+        when(statusRepository.findByUserId(1L))
+                .thenReturn(List.of(watchedLiked, watchedDisliked, watchLater));
+
+        UserStatsDTO stats = service.getUserStats(1L);
+
+        assertThat(stats.getTotalMoviesWatched()).isEqualTo(2);
+        assertThat(stats.getTotalWatchTimeMinutes()).isEqualTo(226);
+        assertThat(stats.getLikedCount()).isEqualTo(1);
+        assertThat(stats.getDislikedCount()).isEqualTo(1);
+        assertThat(stats.getWatchLaterCount()).isEqualTo(1);
     }
 
     @Test

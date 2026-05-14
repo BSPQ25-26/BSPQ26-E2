@@ -1,6 +1,7 @@
 package com.bspq.e2.service;
 
 import com.bspq.e2.dto.MovieStatusDTO;
+import com.bspq.e2.dto.UserStatsDTO;
 import com.bspq.e2.model.Movie;
 import com.bspq.e2.model.User;
 import com.bspq.e2.model.UserMovieStatus;
@@ -130,6 +131,32 @@ public class UserMovieStatusService {
         status.setNote(normalizeNote(note));
         return toDTO(statusRepository.save(status));
     }
+    @Transactional(readOnly = true)
+    public UserStatsDTO getUserStats(Long userId) {
+        List<UserMovieStatus> statuses = statusRepository.findByUserId(userId);
+
+        long totalMoviesWatched = statuses.stream()
+                .filter(UserMovieStatus::isWatched)
+                .count();
+        long totalWatchTimeMinutes = statuses.stream()
+                .filter(UserMovieStatus::isWatched)
+                .map(UserMovieStatus::getMovie)
+                .filter(movie -> movie != null)
+                .mapToLong(Movie::getDuration)
+                .sum();
+        long likedCount = statuses.stream()
+                .filter(UserMovieStatus::isLiked)
+                .count();
+        long dislikedCount = statuses.stream()
+                .filter(UserMovieStatus::isDisliked)
+                .count();
+        long watchLaterCount = statuses.stream()
+                .filter(UserMovieStatus::isWatchLater)
+                .count();
+
+        return new UserStatsDTO(totalMoviesWatched, totalWatchTimeMinutes, likedCount, dislikedCount, watchLaterCount);
+    }
+
 
     private UserMovieStatus getOrCreate(Long userId, Long movieId) {
         return statusRepository.findByUserIdAndMovieId(userId, movieId)
