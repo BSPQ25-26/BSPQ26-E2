@@ -121,8 +121,8 @@ public class UserMovieStatusController {
     public ResponseEntity<MovieStatusDTO> updateNote(
             @PathVariable Long userId,
             @PathVariable Long movieId,
-            @RequestBody java.util.Map<String, String> payload) {
-        return ResponseEntity.ok(statusService.updateNote(userId, movieId, payload.get("note")));
+            @RequestBody MovieNoteRequest request) {
+        return ResponseEntity.ok(statusService.updateNote(userId, movieId, request.getNote()));
     }
 
     @DeleteMapping("/{movieId}/status/note")
