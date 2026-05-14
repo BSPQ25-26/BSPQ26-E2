@@ -15,6 +15,9 @@ public interface UserMovieStatusRepository extends JpaRepository<UserMovieStatus
     Optional<UserMovieStatus> findByUserIdAndMovieId(Long userId, Long movieId);
 
     @EntityGraph(attributePaths = {"movie"})
+    List<UserMovieStatus> findByUserId(Long userId);
+
+    @EntityGraph(attributePaths = {"movie"})
     List<UserMovieStatus> findByUserIdAndWatchLaterTrue(Long userId);
 
     @EntityGraph(attributePaths = {"movie"})

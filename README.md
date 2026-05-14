@@ -7,7 +7,8 @@ MovieTrakk is a full-stack movie tracking web application built with Spring Boot
 | Area | Description |
 |------|-------------|
 | **User Authentication** | Register and log in with hashed passwords and role support. |
-| **Movie Catalog** | Browse the full catalog and filter by query, genre or year. |
+| **Movie Catalog** | Browse the full catalog and filter by title, genre or year. |
+| **Recommendations** | See untracked movies that share genre, release decade or runtime features with liked movies. |
 | **Movie Details** | Inspect posters, synopsis and metadata for each movie. |
 | **Personal Lists** | Mark movies as watched, watch later, liked or disliked. |
 | **Notes** | Save personal notes up to 1000 characters per movie. |
@@ -157,7 +158,7 @@ The profiling script starts the application with the `profiling` profile, launch
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/api/movies` | List all movies or filter with `query`, `genre` or `year` |
+| `GET` | `/api/movies` | List all movies or filter with `title`, `genre` or `year` |
 | `GET` | `/api/movies/{id}` | Fetch movie details |
 | `POST` | `/api/movies` | Create a movie |
 | `PUT` | `/api/movies/{id}` | Update a movie with header `X-User-Role: ADMIN` |
@@ -180,6 +181,13 @@ The profiling script starts the application with the `profiling` profile, launch
 | `POST` | `/{movieId}/status/dislike` | Dislike a movie |
 | `DELETE` | `/{movieId}/status/dislike` | Remove dislike |
 | `GET` | `/disliked` | Get disliked movies |
+| `GET` | `/recommendations` | Get recommended movies |
 | `GET` | `/{movieId}/status` | Get the current status DTO |
 | `PUT` | `/{movieId}/status/note` | Save or update a note |
 | `DELETE` | `/{movieId}/status/note` | Clear a note |
+
+### User Stats - `/api/me`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/stats?userId=` | Get watched count, watch time, liked, disliked and watch-later totals |

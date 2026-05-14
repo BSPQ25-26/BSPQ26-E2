@@ -55,6 +55,10 @@ class SecurityConfigTest {
         mockMvc.perform(get("/api/users/1/movies/watched"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("user-movies"));
+
+        mockMvc.perform(get("/api/me/test-stats"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("stats"));
     }
 
     @Test
@@ -86,6 +90,11 @@ class SecurityTestRoutes {
     @GetMapping("/api/users/1/movies/watched")
     String userMovies() {
         return "user-movies";
+    }
+
+    @GetMapping("/api/me/test-stats")
+    String stats() {
+        return "stats";
     }
 
     @GetMapping("/private-area")

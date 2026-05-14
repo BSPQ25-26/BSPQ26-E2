@@ -52,30 +52,64 @@ class MovieControllerTest {
 
     @Test
     void getMovies_withGenreFilter_returnsGenreMatches() throws Exception {
-        when(movieRepository.findByGenre("Sci-Fi")).thenReturn(List.of(movie(1L, "Interstellar", "Sci-Fi", 2014)));
+        when(movieRepository.findAll()).thenReturn(List.of(
+                movie(1L, "Interstellar", "Sci-Fi", 2014),
+                movie(2L, "The Godfather", "Drama", 1972)
+        ));
 
         mockMvc.perform(get("/api/movies").param("genre", "Sci-Fi"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].title").value("Interstellar"));
     }
 
     @Test
     void getMovies_withYearFilter_returnsYearMatches() throws Exception {
-        when(movieRepository.findByYear(2010)).thenReturn(List.of(movie(2L, "Inception", "Sci-Fi", 2010)));
+        when(movieRepository.findAll()).thenReturn(List.of(
+                movie(2L, "Inception", "Sci-Fi", 2010),
+                movie(3L, "Arrival", "Sci-Fi", 2016)
+        ));
 
         mockMvc.perform(get("/api/movies").param("year", "2010"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].year").value(2010));
     }
 
     @Test
     void getMovies_withQueryFilter_returnsTitleMatches() throws Exception {
-        when(movieRepository.findByTitleContainingIgnoreCase("godfather"))
-                .thenReturn(List.of(movie(3L, "The Godfather", "Drama", 1972)));
+        when(movieRepository.findAll()).thenReturn(List.of(
+                movie(3L, "The Godfather", "Drama", 1972),
+                movie(4L, "Superbad", "Comedy", 2007)
+        ));
 
         mockMvc.perform(get("/api/movies").param("query", "godfather"))
                 .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].title").value("The Godfather"));
+    }
+
+    @Test
+    void getMovies_withCombinedFilters_returnsOnlyCombinedMatches() throws Exception {
+        when(movieRepository.findAll()).thenReturn(List.of(
+                movie(1L, "Interstellar", "Sci-Fi", 2014),
+                movie(2L, "Interstate 60", "Fantasy", 2002),
+                movie(3L, "Arrival", "Sci-Fi", 2016)
+        ));
+
+        mockMvc.perform(get("/api/movies")
+                        .param("title", "inter")
+                        .param("genre", "Sci-Fi")
+                        .param("year", "2014"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].title").value("Interstellar"));
+    }
+
+    @Test
+    void getMovies_withInvalidYear_returnsBadRequest() throws Exception {
+        mockMvc.perform(get("/api/movies").param("year", "broken"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

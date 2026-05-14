@@ -29,6 +29,7 @@ public class SecurityConfig {
                     "/error"
                 ).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/me/**").permitAll()
                 .requestMatchers("/api/movies/**").permitAll()
                 .requestMatchers("/api/users/**").permitAll()
                 .requestMatchers(
