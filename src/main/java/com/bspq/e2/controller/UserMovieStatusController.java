@@ -1,5 +1,6 @@
 package com.bspq.e2.controller;
 
+import com.bspq.e2.dto.MovieNoteRequest;
 import com.bspq.e2.dto.MovieStatusDTO;
 import com.bspq.e2.model.Movie;
 import com.bspq.e2.service.UserMovieStatusService;
