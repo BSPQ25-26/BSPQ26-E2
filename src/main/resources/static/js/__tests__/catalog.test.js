@@ -188,7 +188,7 @@ describe("catalog client logic", () => {
     test("buildMovieQuery creates query string from filters", () => {
         expect(catalog.buildMovieQuery({ title: "", genre: "all", year: "" })).toBe("");
         expect(catalog.buildMovieQuery({ title: "Inception", genre: "Sci-Fi", year: "2010" }))
-            .toBe("?query=Inception&genre=Sci-Fi&year=2010");
+            .toBe("?title=Inception&genre=Sci-Fi&year=2010");
     });
 
     test("getSessionInfo handles malformed storage", () => {
@@ -504,9 +504,9 @@ describe("catalog client logic", () => {
         yearInput.dispatchEvent(new Event("input", { bubbles: true }));
         await settle();
 
-        expect(calls).toContain("/api/movies?query=arrival");
-        expect(calls).toContain("/api/movies?query=arrival&genre=Drama");
-        expect(calls).toContain("/api/movies?query=arrival&genre=Drama&year=broken");
+        expect(calls).toContain("/api/movies?title=arrival");
+        expect(calls).toContain("/api/movies?title=arrival&genre=Drama");
+        expect(calls).toContain("/api/movies?title=arrival&genre=Drama&year=broken");
         expect(document.getElementById("catalog-message").textContent).toContain("Catalog down");
     });
 

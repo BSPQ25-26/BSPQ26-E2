@@ -38,7 +38,7 @@
         const year = readText(filters?.year);
 
         if (title) {
-            params.set("query", title);
+            params.set("title", title);
         }
         if (genre && genre.toLowerCase() !== "all") {
             params.set("genre", genre);

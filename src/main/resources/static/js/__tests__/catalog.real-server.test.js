@@ -327,11 +327,11 @@ describe("catalog client integration with the real Spring Boot server", () => {
         await waitForCondition(() =>
             grid.textContent.includes("Profiling Session") &&
             !grid.textContent.includes("Performance Runner") &&
-            calls.some((entry) => entry.path === "/api/movies?query=Profiling")
+            calls.some((entry) => entry.path === "/api/movies?title=Profiling")
         );
 
         expect(grid.textContent).toContain("Profiling Session");
         expect(grid.textContent).not.toContain("Performance Runner");
-        expect(calls.some((entry) => entry.path === "/api/movies?query=Profiling")).toBe(true);
+        expect(calls.some((entry) => entry.path === "/api/movies?title=Profiling")).toBe(true);
     });
 });

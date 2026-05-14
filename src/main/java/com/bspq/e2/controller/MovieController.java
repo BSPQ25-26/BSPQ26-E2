@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -24,11 +24,29 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Movie>> getAllMovies(@RequestParam(required = false) String query) {
-        if (query != null && !query.isEmpty()) {
-            return ResponseEntity.ok(movieRepository.findByTitleContainingIgnoreCase(query));
+    public ResponseEntity<List<Movie>> getAllMovies(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) String year) {
+        Integer parsedYear = null;
+        if (hasText(year)) {
+            try {
+                parsedYear = Integer.parseInt(year.trim());
+            } catch (NumberFormatException ex) {
+                return ResponseEntity.badRequest().body(List.of());
+            }
         }
-        return ResponseEntity.ok(movieRepository.findAll());
+
+        String titleFilter = firstText(title, query);
+        Integer yearFilter = parsedYear;
+        List<Movie> movies = movieRepository.findAll().stream()
+                .filter(movie -> matchesTitle(movie, titleFilter))
+                .filter(movie -> matchesGenre(movie, genre))
+                .filter(movie -> yearFilter == null || movie.getYear() == yearFilter)
+                .toList();
+
+        return ResponseEntity.ok(movies);
     }
 
     @GetMapping("/{id}")
@@ -37,23 +55,6 @@ public class MovieController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-    
-    @GetMapping(params = "genre")
-    public ResponseEntity<List<Movie>> getMoviesByGenre(@RequestParam String genre) {
-        if (genre != null && !genre.isEmpty()) {
-        	return ResponseEntity.ok(movieRepository.findByGenre(genre));
-        }
-        return ResponseEntity.ok(movieRepository.findAll());
-    }
-
-    @GetMapping(params = "year")
-    public ResponseEntity<List<Movie>> getMoviesByYear(@RequestParam String year) {
-        if (year != null && !year.isEmpty()) {
-        	return ResponseEntity.ok(movieRepository.findByYear(Integer.parseInt(year)));
-        }
-        return ResponseEntity.ok(movieRepository.findAll());
-    }
-    
     @PostMapping
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
         return ResponseEntity.ok(movieRepository.save(movie));
@@ -85,5 +86,34 @@ public class MovieController {
         }
         movieRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean matchesTitle(Movie movie, String titleFilter) {
+        if (!hasText(titleFilter)) {
+            return true;
+        }
+        return containsIgnoreCase(movie.getTitle(), titleFilter);
+    }
+
+    private boolean matchesGenre(Movie movie, String genreFilter) {
+        if (!hasText(genreFilter) || "all".equalsIgnoreCase(genreFilter.trim())) {
+            return true;
+        }
+        return movie.getGenre() != null && movie.getGenre().equalsIgnoreCase(genreFilter.trim());
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(query.trim().toLowerCase(Locale.ROOT));
+    }
+
+    private String firstText(String primary, String fallback) {
+        if (hasText(primary)) {
+            return primary;
+        }
+        return fallback;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }
