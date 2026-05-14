@@ -22,8 +22,8 @@ MovieTrakk is a full-stack movie tracking web application built with Spring Boot
 | **Backend** | Java 21, Spring Boot 3.2.5, Spring Security, Spring Data JPA |
 | **Database** | PostgreSQL in normal runs, H2 for local profiling and performance runs |
 | **Frontend** | HTML5, CSS3, Vanilla JavaScript |
-| **Build** | Maven, frontend-maven-plugin, Node 20, npm 10 |
-| **Testing** | JUnit 5, JUnit 4, Mockito, AssertJ, Jest, JaCoCo, ContiPerf |
+| **Build** | Maven, Java 21 |
+| **Testing** | JUnit 5, JUnit 4, Mockito, AssertJ, JaCoCo, ContiPerf |
 | **Profiling** | VisualVM 2.2.1 |
 
 ## Project Structure
@@ -107,7 +107,7 @@ GitHub Actions runs the mandatory test suite on every push and pull request with
 mvn -B clean test
 ```
 
-That command executes the Java/Spring tests, the Jest frontend tests and the configured coverage checks. ContiPerf remains a local/manual verification flow so the required CI check stays fast and stable.
+That command executes the Java/Spring tests and the configured coverage checks. ContiPerf remains a local/manual verification flow so the required CI check stays fast and stable.
 
 To require passing tests before merging pull requests, enable branch protection in GitHub under `Settings` -> `Branches` -> `Branch protection rules` and require the `Tests / test` status check.
 
