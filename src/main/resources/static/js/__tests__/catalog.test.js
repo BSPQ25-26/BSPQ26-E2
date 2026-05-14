@@ -28,6 +28,9 @@ function setupCatalogDom() {
         </section>
         <p id="admin-message"></p>
         <p id="catalog-message"></p>
+        <section id="recommendations-section" hidden>
+            <section id="recommendations-grid"></section>
+        </section>
         <section id="catalog-grid"></section>
     `;
 }
@@ -304,6 +307,24 @@ describe("catalog client logic", () => {
         expect(card.textContent).toContain("TBD");
     });
 
+    test("recommendation helpers render recommended movies", async () => {
+        const section = document.createElement("section");
+        const grid = document.createElement("section");
+        section.hidden = true;
+
+        catalog.renderRecommendations(section, grid, [movie(9, { title: "Recommended Movie" })]);
+        expect(section.hidden).toBe(false);
+        expect(grid.textContent).toContain("Recommended Movie");
+
+        catalog.renderRecommendations(section, grid, []);
+        expect(section.hidden).toBe(true);
+
+        global.fetch = jest.fn().mockResolvedValue(jsonResponse(200, [movie(10)]));
+        await expect(catalog.fetchRecommendations(4)).resolves.toHaveLength(1);
+        await expect(catalog.fetchRecommendations(null)).resolves.toEqual([]);
+        expect(global.fetch).toHaveBeenCalledWith("/api/users/4/movies/recommendations", undefined);
+    });
+
     test("form and status helpers cover defensive branches", () => {
         expect(() => catalog.setStatus(null, "Ignored", true)).not.toThrow();
         expect(() => catalog.resetAdminForm(null)).not.toThrow();
@@ -508,6 +529,31 @@ describe("catalog client logic", () => {
         expect(calls).toContain("/api/movies?title=arrival&genre=Drama");
         expect(calls).toContain("/api/movies?title=arrival&genre=Drama&year=broken");
         expect(document.getElementById("catalog-message").textContent).toContain("Catalog down");
+    });
+
+    test("catalog grid loads recommendations for sessions with user id", async () => {
+        setupCatalogDom();
+        sessionStorage.setItem("movieTrakk.session", JSON.stringify({ userId: 4, username: "viewer", role: "USER" }));
+
+        const calls = [];
+        global.fetch = jest.fn(async (input) => {
+            const target = new URL(input, "http://127.0.0.1");
+            calls.push(`${target.pathname}${target.search}`);
+
+            if (target.pathname.endsWith("/recommendations")) {
+                return jsonResponse(200, [movie(12, { title: "Arrival" })]);
+            }
+
+            return jsonResponse(200, [movie(7, { title: "Catalog Movie" })]);
+        });
+
+        await catalog.initCatalog();
+        await settle();
+
+        expect(calls).toContain("/api/users/4/movies/recommendations");
+        expect(document.getElementById("recommendations-section").hidden).toBe(false);
+        expect(document.getElementById("recommendations-grid").textContent).toContain("Arrival");
+        expect(document.getElementById("catalog-grid").textContent).toContain("Catalog Movie");
     });
 
     test("catalog inline admin handles missing selections and server failures", async () => {

@@ -49,6 +49,9 @@ function setupCatalogDom() {
         </section>
         <p id="admin-message"></p>
         <p id="catalog-message"></p>
+        <section id="recommendations-section" hidden>
+            <section id="recommendations-grid"></section>
+        </section>
         <section id="catalog-grid"></section>
     `;
 }
