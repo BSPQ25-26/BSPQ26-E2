@@ -252,6 +252,77 @@ class UserMovieStatusServiceTest {
     }
 
     @Test
+    void getRecommendations_returnsUntrackedMoviesSharingLikedGenres() {
+        Movie likedMovie = makeMovie(10L, "Interstellar", "Sci-Fi", 2014, 169);
+        Movie trackedMovie = makeMovie(11L, "The Matrix", "Sci-Fi", 1999, 136);
+        Movie arrival = makeMovie(12L, "Arrival", "Sci-Fi", 2016, 116);
+        Movie bladeRunner = makeMovie(13L, "Blade Runner", "Sci-Fi", 1982, 117);
+        Movie theMartian = makeMovie(14L, "The Martian", "Adventure", 2015, 144);
+        Movie heat = makeMovie(15L, "Heat", "Crime", 1995, 170);
+
+        UserMovieStatus likedStatus = statusFor(likedMovie);
+        likedStatus.markAsWatched();
+        likedStatus.like();
+
+        UserMovieStatus trackedStatus = statusFor(trackedMovie);
+        trackedStatus.markAsWatched();
+
+        when(statusRepository.findByUserId(1L))
+                .thenReturn(List.of(likedStatus, trackedStatus));
+        when(movieRepository.findAll())
+                .thenReturn(List.of(likedMovie, trackedMovie, heat, theMartian, bladeRunner, arrival));
+
+        List<Movie> recommendations = service.getRecommendations(1L);
+
+        assertThat(recommendations)
+                .extracting(Movie::getTitle)
+                .containsExactly("Arrival", "Blade Runner", "The Martian");
+    }
+
+    @Test
+    void getRecommendations_returnsEmptyWhenUserHasNoLikedGenres() {
+        when(statusRepository.findByUserId(1L))
+                .thenReturn(List.of(statusFor(makeMovie(10L, "Heat", "Crime", 170))));
+
+        assertThat(service.getRecommendations(1L)).isEmpty();
+        verify(movieRepository, never()).findAll();
+    }
+
+    @Test
+    void getRecommendations_ranksBySharedFeatureScoreAndLimitsResults() {
+        Movie likedSciFi = makeMovie(10L, "Interstellar", "Sci-Fi", 2014, 169);
+        Movie likedDrama = makeMovie(11L, "Arrival", "Drama", 2016, 116);
+        UserMovieStatus likedSciFiStatus = statusFor(likedSciFi);
+        likedSciFiStatus.markAsWatched();
+        likedSciFiStatus.like();
+        UserMovieStatus likedDramaStatus = statusFor(likedDrama);
+        likedDramaStatus.markAsWatched();
+        likedDramaStatus.like();
+
+        when(statusRepository.findByUserId(1L))
+                .thenReturn(List.of(likedSciFiStatus, likedDramaStatus));
+        when(movieRepository.findAll()).thenReturn(List.of(
+                likedSciFi,
+                likedDrama,
+                makeMovie(12L, "Dune", "Sci-Fi", 2021, 155),
+                makeMovie(13L, "Gravity", "Sci-Fi", 2013, 91),
+                makeMovie(14L, "Moon", "Sci-Fi", 2009, 97),
+                makeMovie(15L, "Prisoners", "Drama", 2013, 153),
+                makeMovie(16L, "Spotlight", "Drama", 2015, 128),
+                makeMovie(17L, "The Martian", "Adventure", 2015, 144),
+                makeMovie(18L, "Whiplash", "Drama", 2014, 107),
+                makeMovie(19L, "Unrelated Classic", "Noir", 1995, 170)
+        ));
+
+        List<Movie> recommendations = service.getRecommendations(1L);
+
+        assertThat(recommendations)
+                .extracting(Movie::getTitle)
+                .containsExactly("Prisoners", "Spotlight", "Whiplash", "Gravity", "Dune", "Moon");
+        assertThat(recommendations).hasSize(6);
+    }
+
+    @Test
     void markAsWatched_keepsHistory() {
         mockCreate();
         MovieStatusDTO dto = service.markAsWatched(1L, 10L);

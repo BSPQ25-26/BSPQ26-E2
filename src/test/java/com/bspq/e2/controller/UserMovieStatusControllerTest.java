@@ -172,6 +172,16 @@ class UserMovieStatusControllerTest {
     }
 
     @Test
+    void getRecommendations_returnsRecommendedMovies() throws Exception {
+        when(statusService.getRecommendations(1L)).thenReturn(List.of(movie(14L, "Blade Runner")));
+
+        mockMvc.perform(get("/api/users/1/movies/recommendations"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(14))
+                .andExpect(jsonPath("$[0].title").value("Blade Runner"));
+    }
+
+    @Test
     void getStatus_returnsCurrentStatus() throws Exception {
         when(statusService.getStatus(1L, 10L)).thenReturn(dto(10L, true, false, false, false));
 
