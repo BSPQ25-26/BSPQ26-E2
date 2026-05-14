@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -25,64 +25,95 @@ public class MovieController {
 
     @GetMapping
     public ResponseEntity<List<Movie>> getAllMovies(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String query,
             @RequestParam(required = false) String genre,
-            @RequestParam(required = false) Integer year,
-            @RequestParam(required = false) String query) {
-        if (genre != null && !genre.isEmpty()) {
-            return ResponseEntity.ok(movieRepository.findByGenre(genre));
+            @RequestParam(required = false) String year) {
+        Integer parsedYear = null;
+        if (hasText(year)) {
+            try {
+                parsedYear = Integer.parseInt(year.trim());
+            } catch (NumberFormatException ex) {
+                return ResponseEntity.badRequest().body(List.of());
+            }
         }
-        if (year != null) {
-            return ResponseEntity.ok(movieRepository.findByYear(year));
-        }
-        if (query != null && !query.isEmpty()) {
-            return ResponseEntity.ok(movieRepository.findByTitleContainingIgnoreCase(query));
-        }
-        return ResponseEntity.ok(movieRepository.findAll());
+
+        String titleFilter = firstText(title, query);
+        Integer yearFilter = parsedYear;
+        List<Movie> movies = movieRepository.findAll().stream()
+                .filter(movie -> matchesTitle(movie, titleFilter))
+                .filter(movie -> matchesGenre(movie, genre))
+                .filter(movie -> yearFilter == null || movie.getYear() == yearFilter)
+                .toList();
+
+        return ResponseEntity.ok(movies);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+        return movieRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
     @PostMapping
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
         return ResponseEntity.ok(movieRepository.save(movie));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateMovie(
-            @PathVariable Long id,
-            @RequestBody Movie payload,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+    public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role, @RequestBody Movie movieDetails) {
         if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");
         }
-
-        Optional<Movie> existing = movieRepository.findById(id);
-        if (existing.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Movie movie = existing.get();
-        movie.setTitle(payload.getTitle());
-        movie.setGenre(payload.getGenre());
-        movie.setYear(payload.getYear());
-        movie.setDuration(payload.getDuration());
-        movie.setSynopsis(payload.getSynopsis());
-        movie.setPosterUrl(payload.getPosterUrl());
-
-        return ResponseEntity.ok(movieRepository.save(movie));
+        return movieRepository.findById(id).map(movie -> {
+            movie.setTitle(movieDetails.getTitle());
+            movie.setGenre(movieDetails.getGenre());
+            movie.setYear(movieDetails.getYear());
+            movie.setDuration(movieDetails.getDuration());
+            movie.setSynopsis(movieDetails.getSynopsis());
+            movie.setPosterUrl(movieDetails.getPosterUrl());
+            return ResponseEntity.ok(movieRepository.save(movie));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMovie(
-            @PathVariable Long id,
-            @RequestHeader(value = "X-User-Role", required = false) String role) {
+    public ResponseEntity<?> deleteMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role) {
         if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");
         }
-
         if (!movieRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
-
         movieRepository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    private boolean matchesTitle(Movie movie, String titleFilter) {
+        if (!hasText(titleFilter)) {
+            return true;
+        }
+        return containsIgnoreCase(movie.getTitle(), titleFilter);
+    }
+
+    private boolean matchesGenre(Movie movie, String genreFilter) {
+        if (!hasText(genreFilter) || "all".equalsIgnoreCase(genreFilter.trim())) {
+            return true;
+        }
+        return movie.getGenre() != null && movie.getGenre().equalsIgnoreCase(genreFilter.trim());
+    }
+
+    private boolean containsIgnoreCase(String value, String query) {
+        return value != null && value.toLowerCase(Locale.ROOT).contains(query.trim().toLowerCase(Locale.ROOT));
+    }
+
+    private String firstText(String primary, String fallback) {
+        if (hasText(primary)) {
+            return primary;
+        }
+        return fallback;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.trim().isEmpty();
     }
 }

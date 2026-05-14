@@ -108,6 +108,12 @@ public class UserMovieStatusController {
         return ResponseEntity.ok(statusService.getDislikedList(userId));
     }
 
+    @GetMapping("/recommendations")
+    public ResponseEntity<List<Movie>> getRecommendations(
+            @PathVariable Long userId) {
+        return ResponseEntity.ok(statusService.getRecommendations(userId));
+    }
+
     //  Status
 
     @GetMapping("/{movieId}/status")

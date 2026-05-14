@@ -1235,6 +1235,37 @@ body.admin-locked [data-admin-only] {
     }
 }
 
+.recommendations-section {
+    margin-bottom: 1.3rem;
+    padding-bottom: 1.1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.recommendations-section[hidden] {
+    display: none;
+}
+
+.section-head {
+    margin-bottom: 0.8rem;
+}
+
+.section-head h2 {
+    margin: 0;
+    font-family: "Epilogue", "Segoe UI", sans-serif;
+    font-size: 1.35rem;
+    letter-spacing: 0;
+}
+
+.section-head p {
+    margin: 0.35rem 0 0;
+    color: var(--text-soft);
+    font-size: 0.9rem;
+}
+
+.recommendations-grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+}
+
 :root {
     --background: #131313;
     --surface: #1c1b1b;

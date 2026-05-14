@@ -28,6 +28,11 @@
         return Number.isNaN(parsed) ? 0 : parsed;
     }
 
+    function normalizeUserId(value) {
+        const parsed = Number.parseInt(String(value), 10);
+        return Number.isNaN(parsed) || parsed <= 0 ? null : parsed;
+    }
+
     function compareText(left, right) {
         return readText(left).localeCompare(readText(right), undefined, { sensitivity: "base" });
     }
@@ -39,7 +44,7 @@
         const year = readText(filters?.year);
 
         if (title) {
-            params.set("query", title);
+            params.set("title", title);
         }
         if (genre && genre.toLowerCase() !== "all") {
             params.set("genre", genre);
@@ -267,6 +272,16 @@
         return Array.isArray(data) ? data : [];
     }
 
+    async function fetchRecommendations(userId) {
+        const normalizedUserId = normalizeUserId(userId);
+        if (!normalizedUserId) {
+            return [];
+        }
+
+        const data = await requestJson(`/api/users/${normalizedUserId}/movies/recommendations`);
+        return Array.isArray(data) ? data : [];
+    }
+
     function movieDescription(movie) {
         const synopsis = readText(movie.synopsis);
         return synopsis || "No synopsis available.";
@@ -391,6 +406,24 @@
                 status: movie.status || createEmptyStatus(movie.movie?.id || movie.id)
             }));
         });
+    }
+
+    function renderRecommendations(sectionElement, gridElement, movies) {
+        if (!sectionElement || !gridElement) {
+            return;
+        }
+
+        gridElement.innerHTML = "";
+
+        if (!Array.isArray(movies) || movies.length === 0) {
+            sectionElement.hidden = true;
+            return;
+        }
+
+        movies.forEach((movie) => {
+            gridElement.append(createMovieCard(movie, false));
+        });
+        sectionElement.hidden = false;
     }
 
     function setStatus(element, message, error) {
@@ -957,6 +990,8 @@
         const adminMessage = document.getElementById("admin-message");
         const catalogMessage = document.getElementById("catalog-message");
         const goAdminButton = document.getElementById("go-admin-dashboard");
+        const recommendationsSection = document.getElementById("recommendations-section");
+        const recommendationsGrid = document.getElementById("recommendations-grid");
 
         const session = getSessionInfo();
         const adminMode = isAdminSession(session);
@@ -1004,6 +1039,15 @@
             } catch (error) {
                 renderMovies(gridElement, [], inlineAdminMode);
                 setStatus(catalogMessage, error.message, true);
+            }
+        }
+
+        async function loadRecommendations() {
+            try {
+                const movies = await fetchRecommendations(session?.userId);
+                renderRecommendations(recommendationsSection, recommendationsGrid, movies);
+            } catch (_) {
+                renderRecommendations(recommendationsSection, recommendationsGrid, []);
             }
         }
 
@@ -1122,6 +1166,7 @@
             });
         }
 
+        await loadRecommendations();
         await reloadMovies();
         return true;
     }
@@ -1361,13 +1406,16 @@
 
     const exportsObject = {
         buildMovieQuery,
+        normalizeUserId,
         getSessionInfo,
         isAdminSession,
         requestJson,
         normalizeMoviePayload,
         fetchMovies,
+        fetchRecommendations,
         createMovieCard,
         renderMovies,
+        renderRecommendations,
         bindLogoutAction,
         toggleAdminLinks,
         openAdminModal,
