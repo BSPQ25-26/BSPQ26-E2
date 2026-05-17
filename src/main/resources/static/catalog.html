@@ -69,8 +69,15 @@
         <main class="catalog-main">
             <div class="main-head">
                 <h2>Movie Catalog</h2>
-                <p>Live data from the backend, styled with the new cinematic design system.</p>
             </div>
+
+            <section class="recommendations-section" id="recommendations-section" aria-label="Recommended movies" hidden>
+                <div class="section-head">
+                    <h2>Recommended for you</h2>
+                    <p>Based on movies you liked.</p>
+                </div>
+                <section id="recommendations-grid" class="catalog-grid recommendations-grid"></section>
+            </section>
 
             <section id="catalog-grid" class="catalog-grid" aria-label="Movie cards"></section>
         </main>

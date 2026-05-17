@@ -1,0 +1,3 @@
+serviceId,startTime,duration,invocations,min,average,median,90%,95%,99%,max
+com.bspq.e2.performance.RemotePerformanceSuccessIT.noteUpdateEndpoint_roundTripsOverHttp,1777306005123,157,20,4,8,5,6,7,7,68
+com.bspq.e2.performance.RemotePerformanceSuccessIT.catalogEndpoint_supportsConcurrentRemoteReads,1777306005295,103,60,3,6.8,5,7,35,35,36

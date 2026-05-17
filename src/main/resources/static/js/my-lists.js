@@ -367,6 +367,10 @@
     function bindTabButtons() {
         const tabButtons = document.querySelectorAll(".tab-button");
         tabButtons.forEach((button) => {
+            if (button.dataset.listBound === "true") {
+                return;
+            }
+            button.dataset.listBound = "true";
             button.addEventListener("click", () => {
                 const listType = button.dataset.listType;
                 if (!listType) {
@@ -411,9 +415,44 @@
         await loadAndDisplayList("watched");
     }
 
-    if (scope.document && scope.document.readyState === "loading") {
-        scope.document.addEventListener("DOMContentLoaded", initPage);
-    } else {
-        initPage();
+    const exportsObject = {
+        LIST_ENDPOINTS,
+        readText,
+        toNumberOrZero,
+        normalizeUserId,
+        getSessionInfo,
+        isAdminSession,
+        requestJson,
+        createMovieCard,
+        renderMovies,
+        setStatus,
+        bindLogoutAction,
+        toggleAdminLinks,
+        bindAdminDashboardAction,
+        persistSession,
+        getStoredUserId,
+        ensureSessionUserId,
+        loadMovieList,
+        loadAndDisplayList,
+        initPage
+    };
+
+    /* istanbul ignore next */
+    if (typeof module !== "undefined" && module.exports) {
+        module.exports = exportsObject;
+    }
+
+    /* istanbul ignore next */
+    if (scope && typeof scope.window !== "undefined") {
+        scope.window.MovieLists = exportsObject;
+        /* istanbul ignore next */
+        if (!scope.window.__MOVIE_LISTS_DISABLE_AUTO_INIT__) {
+            /* istanbul ignore next */
+            if (scope.document && scope.document.readyState === "loading") {
+                scope.document.addEventListener("DOMContentLoaded", initPage);
+            } else {
+                initPage();
+            }
+        }
     }
 })(window);

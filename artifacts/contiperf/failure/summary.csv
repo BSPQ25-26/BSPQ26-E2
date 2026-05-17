@@ -1,0 +1,2 @@
+serviceId,startTime,duration,invocations,min,average,median,90%,95%,99%,max
+com.bspq.e2.performance.RemotePerformanceFailureIT.catalogEndpoint_failsWhenThresholdsAreUnrealistic,1777306032121,797,20,6,80,7,8,735,735,735
