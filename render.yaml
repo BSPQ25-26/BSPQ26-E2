@@ -1,9 +1,7 @@
 services:
   - type: web
     name: movietrakk-app
-    runtime: maven
-    buildCommand: mvn clean install -DskipTests
-    startCommand: java -jar target/MovieTrakk-1.0-SNAPSHOT.jar --server.port=$PORT
+    runtime: docker
     envVars:
       - key: JAVA_VERSION
         value: 21
@@ -12,7 +10,7 @@ services:
       - key: SUPABASE_DB_URL
         fromDatabase:
           name: movietrakk-db
-          property: jdbcConnectionString
+          property: connectionString
       - key: SUPABASE_DB_USER
         fromDatabase:
           name: movietrakk-db
