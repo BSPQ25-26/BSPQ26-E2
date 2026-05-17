@@ -1,6 +1,7 @@
 services:
   - type: web
     name: movietrakk-app
+    plan: free
     runtime: docker
     envVars:
       - key: JAVA_VERSION
@@ -8,18 +9,9 @@ services:
       - key: SPRING_PROFILES_ACTIVE
         value: prod
       - key: SUPABASE_DB_URL
-        fromDatabase:
-          name: movietrakk-db
-          property: connectionString
       - key: SUPABASE_DB_USER
-        fromDatabase:
-          name: movietrakk-db
-          property: user
       - key: SUPABASE_DB_PASSWORD
-        fromDatabase:
-          name: movietrakk-db
-          property: password
-
-databases:
-  - name: movietrakk-db
-    plan: free
+      - key: DB_POOL_MAX_SIZE
+        value: 5
+      - key: DB_POOL_MIN_IDLE
+        value: 1
