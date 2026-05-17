@@ -28,7 +28,10 @@ replay_pid*
 *.env
 
 # Java build output
-target/
+target/*
+
+# But do not ignore .jar files located inside target
+!target/*.jar
 
 # Local JavaScript test tooling
 node_modules/
