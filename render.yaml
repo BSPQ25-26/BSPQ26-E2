@@ -1,7 +1,7 @@
 services:
   - type: web
     name: movietrakk-app
-    runtime: java
+    runtime: maven
     buildCommand: mvn clean install -DskipTests
     startCommand: java -jar target/MovieTrakk-1.0-SNAPSHOT.jar --server.port=$PORT
     envVars:
