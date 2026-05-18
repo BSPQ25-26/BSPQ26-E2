@@ -110,7 +110,32 @@ mvn -B clean test
 That command executes the Java/Spring tests and the configured coverage checks. ContiPerf remains a local/manual verification flow so the required CI check stays fast and stable.
 
 To require passing tests before merging pull requests, enable branch protection in GitHub under `Settings` -> `Branches` -> `Branch protection rules` and require the `Tests / test` status check.
+## Documentation
 
+This repository now includes a Sphinx documentation portal in `docs-sphinx/`.
+
+### Build locally
+
+```bash
+cd docs-sphinx
+pip install -r requirements.txt
+make html
+```
+
+Open the generated HTML site at `docs-sphinx/_build/html/index.html`.
+
+### GitHub Pages deployment
+
+A new GitHub Actions workflow is configured in `.github/workflows/sphinx-docs.yml`.
+It builds the Sphinx site on pushes to `main` and publishes the generated HTML to the `gh-pages` branch under the `sphinx/` folder.
+
+When GitHub Pages is configured for the repository, the documentation will be available at:
+
+```text
+https://<owner>.github.io/<repo>/sphinx/
+```
+
+Replace `<owner>` and `<repo>` with your GitHub username and repository name.
 ### Test Categories
 
 | Category | Files | Description |
