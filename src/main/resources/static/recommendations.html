@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MovieTrakk - Recommendations</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/catalog.css" />
+</head>
+<body>
+    <main class="catalog-layout">
+        <section class="hero">
+            <h1>✨ Recommendations</h1>
+            <p>Discover movies picked just for you</p>
+        </section>
+
+        <nav style="margin-bottom: 2rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="/catalog.html" class="secondary-button">📚 Browse Catalog</a>
+            <a href="/index.html" class="secondary-button">👤 My Account</a>
+        </nav>
+
+        <p id="catalog-message" class="message" aria-live="polite"></p>
+
+        <section id="catalog-grid" class="catalog-grid" aria-label="Recommended movies"></section>
+    </main>
+
+    <script src="/js/recommendations.js"></script>
+</body>
+</html>
