@@ -2,6 +2,8 @@ package com.bspq.e2.controller;
 
 import com.bspq.e2.model.Movie;
 import com.bspq.e2.repository.MovieRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +14,7 @@ import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/movies")
+@Tag(name = "Movies", description = "Catalog search and administrator movie management")
 public class MovieController {
 
     private static final Logger logger = LoggerFactory.getLogger(MovieController.class);
@@ -24,6 +27,7 @@ public class MovieController {
     }
 
     @GetMapping
+    @Operation(summary = "List movies", description = "Lists all movies or filters them by title/query, genre and release year.")
     public ResponseEntity<List<Movie>> getAllMovies(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String query,
@@ -50,17 +54,20 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get movie details", description = "Loads the full movie record for the selected catalog id.")
     public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
         return movieRepository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
     @PostMapping
+    @Operation(summary = "Create movie", description = "Creates a movie catalog entry.")
     public ResponseEntity<Movie> createMovie(@RequestBody Movie movie) {
         return ResponseEntity.ok(movieRepository.save(movie));
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update movie", description = "Updates an existing movie. The X-User-Role header must be ADMIN.")
     public ResponseEntity<?> updateMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role, @RequestBody Movie movieDetails) {
         if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");
@@ -77,6 +84,7 @@ public class MovieController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete movie", description = "Deletes a movie. The X-User-Role header must be ADMIN.")
     public ResponseEntity<?> deleteMovie(@PathVariable Long id, @RequestHeader(value = "X-User-Role", required = false) String role) {
         if (!ADMIN_ROLE.equals(role)) {
             return ResponseEntity.status(403).body("Admin role required");

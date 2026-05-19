@@ -2,11 +2,14 @@ package com.bspq.e2.controller;
 
 import com.bspq.e2.dto.UserStatsDTO;
 import com.bspq.e2.service.UserMovieStatusService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/me")
+@Tag(name = "User Stats", description = "Aggregated personal activity statistics")
 public class UserStatsController {
 
     private final UserMovieStatusService statusService;
@@ -16,6 +19,7 @@ public class UserStatsController {
     }
 
     @GetMapping("/stats")
+    @Operation(summary = "Get user stats", description = "Returns watched count, watch time, liked, disliked and watch-later totals.")
     public ResponseEntity<UserStatsDTO> getStats(
             @RequestParam(required = false) Long userId,
             @RequestHeader(value = "X-User-Id", required = false) Long headerUserId) {
