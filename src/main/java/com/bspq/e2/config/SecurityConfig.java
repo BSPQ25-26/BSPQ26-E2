@@ -22,6 +22,7 @@ public class SecurityConfig {
                     "/my-lists.html",
                     "/movie-details.html",
                     "/admin-dashboard.html",
+                    "/dashboard.html",
                     "/auth.css",
                     "/css/**",
                     "/js/**",
