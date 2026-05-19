@@ -1,6 +1,10 @@
 package com.bspq.e2.dto;
 
-public class UserStatsDTO {
+import java.io.Serializable;
+
+public class UserStatsDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private long totalMoviesWatched;
     private long totalWatchTimeMinutes;

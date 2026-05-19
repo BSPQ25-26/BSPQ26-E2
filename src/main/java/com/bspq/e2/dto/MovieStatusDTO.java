@@ -1,6 +1,10 @@
 package com.bspq.e2.dto;
 
-public class MovieStatusDTO {
+import java.io.Serializable;
+
+public class MovieStatusDTO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private Long movieId;
     private boolean watchLater;

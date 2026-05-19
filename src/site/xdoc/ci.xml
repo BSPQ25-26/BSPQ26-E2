@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>Continuous Integration</title>
+    </properties>
+    <body>
+        <section name="Jenkins">
+            <p>
+                The repository includes a Jenkins declarative pipeline in
+                <code>Jenkinsfile</code>. It checks out the source, runs
+                <code>mvn -B clean test</code>, generates the Maven site and generates
+                Doxygen HTML/PDF documentation.
+            </p>
+            <p>
+                Jenkins archives Maven site, Doxygen outputs, Java test reports and
+                frontend coverage reports after every run.
+            </p>
+        </section>
+        <section name="GitHub Actions">
+            <p>
+                The test workflow runs the required Java and JavaScript test suite.
+                The documentation workflow builds the Maven site, Doxygen HTML and
+                Doxygen PDF, then publishes the result to GitHub Pages.
+            </p>
+        </section>
+    </body>
+</document>
