@@ -143,6 +143,33 @@ describe("my-lists client logic", () => {
         expect(card.querySelector("img").src).toContain("https://poster.example/a.jpg");
     });
 
+    test("render helpers use i18n labels when available", () => {
+        const originalI18n = window.MovieI18n;
+        window.MovieI18n = {
+            t: jest.fn((key) => `tx:${key}`)
+        };
+        const grid = document.createElement("section");
+
+        try {
+            myLists.renderMovies(grid, []);
+            expect(grid.textContent).toContain("tx:lists.empty");
+
+            const card = myLists.createMovieCard(movie(1, {
+                title: "",
+                genre: "Drama",
+                year: 0,
+                duration: 0,
+                synopsis: "",
+                posterUrl: ""
+            }));
+            expect(card.textContent).toContain("tx:common.untitled");
+            expect(card.textContent).toContain("tx:genres.Drama");
+            expect(window.MovieI18n.t).toHaveBeenCalled();
+        } finally {
+            window.MovieI18n = originalI18n;
+        }
+    });
+
     test("requestJson, status helpers and persistence cover fallback branches", async () => {
         setupDom();
 
@@ -237,6 +264,8 @@ describe("my-lists client logic", () => {
 
         expect(document.getElementById("session-user").textContent).toContain("admin");
         expect(document.getElementById("go-admin-dashboard").hidden).toBe(false);
+        expect(document.getElementById("catalog-grid").textContent).toContain("Movie 1");
+        window.dispatchEvent(new Event("movietrakk:languagechange"));
         expect(document.getElementById("catalog-grid").textContent).toContain("Movie 1");
 
         document.querySelector("[data-list-type='liked']").click();

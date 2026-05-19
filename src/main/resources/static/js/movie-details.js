@@ -8,6 +8,45 @@
         like: "liked",
         dislike: "disliked"
     };
+    const DEFAULT_GENRES = [
+        "Action",
+        "Adventure",
+        "Comedy",
+        "Drama",
+        "Fantasy",
+        "Horror",
+        "Noir",
+        "Sci-Fi",
+        "Thriller"
+    ];
+    let lastRenderedMovie = null;
+
+    function translate(key, fallback, params = {}) {
+        const i18n = scope.window?.MovieI18n;
+        if (i18n && typeof i18n.t === "function") {
+            return i18n.t(key, { ...params, defaultValue: fallback });
+        }
+        return fallback;
+    }
+
+    function languageChangedEventName() {
+        return scope.window?.MovieI18n?.LANGUAGE_CHANGED_EVENT || "movietrakk:languagechange";
+    }
+
+    function readText(value) {
+        return value === undefined || value === null ? "" : String(value).trim();
+    }
+
+    function genreTranslationKey(genre) {
+        const value = readText(genre);
+        return DEFAULT_GENRES.includes(value) ? `genres.${value}` : null;
+    }
+
+    function genreLabel(genre) {
+        const value = readText(genre);
+        const key = genreTranslationKey(value);
+        return key ? translate(key, value) : value;
+    }
 
     function getSessionInfo(storage = scope.sessionStorage) {
         try {
@@ -76,7 +115,7 @@
     function setSessionUser(ui, session) {
         setText(ui.sessionUser, session && session.username
             ? `${session.username} (${session.role || "USER"})`
-            : "Guest");
+            : translate("common.guest", "Guest"));
     }
 
     function showToast(container, message, type = "success", setTimeoutFn = scope.setTimeout) {
@@ -98,11 +137,12 @@
     }
 
     function renderMovie(ui, movie) {
-        setText(ui.title, movie.title || "Untitled");
-        setText(ui.genre, movie.genre || "Unknown Genre");
-        setText(ui.year, movie.year || "N/A");
-        setText(ui.duration, movie.duration ? `${movie.duration} min` : "TBD");
-        setText(ui.synopsis, movie.synopsis || "No synopsis available.");
+        lastRenderedMovie = movie;
+        setText(ui.title, movie.title || translate("common.untitled", "Untitled"));
+        setText(ui.genre, genreLabel(movie.genre) || translate("common.unknownGenre", "Unknown Genre"));
+        setText(ui.year, movie.year || translate("common.notAvailable", "N/A"));
+        setText(ui.duration, movie.duration ? `${movie.duration} min` : translate("common.toBeDefined", "TBD"));
+        setText(ui.synopsis, movie.synopsis || translate("common.noSynopsis", "No synopsis available."));
 
         const posterUrl = movie.posterUrl || "";
         setImageSource(ui.poster, posterUrl);
@@ -148,7 +188,7 @@
 
     async function fetchMovieDetails(fetchImpl, session, movieId, ui) {
         if (!movieId) {
-            showError(ui, "No movie ID specified.");
+            showError(ui, translate("details.noMovieId", "No movie ID specified."));
             return null;
         }
 
@@ -156,9 +196,9 @@
             const response = await fetchImpl(`/api/movies/${movieId}`);
             if (!response.ok) {
                 if (response.status === 404) {
-                    throw new Error("Movie not found.");
+                    throw new Error(translate("details.notFound", "Movie not found."));
                 }
-                throw new Error("Failed to load movie details.");
+                throw new Error(translate("details.loadFailed", "Failed to load movie details."));
             }
 
             const movie = await response.json();
@@ -202,14 +242,14 @@
             if (response.ok) {
                 const newStatus = await response.json();
                 updateStatusButtons(ui, newStatus);
-                showToast(ui.toastContainer, "Status updated successfully");
+                showToast(ui.toastContainer, translate("details.statusUpdated", "Status updated successfully"));
                 return true;
             }
 
-            showToast(ui.toastContainer, "Failed to update status", "error");
+            showToast(ui.toastContainer, translate("details.statusFailed", "Failed to update status"), "error");
             return false;
         } catch (error) {
-            showToast(ui.toastContainer, `Error: ${error.message}`, "error");
+            showToast(ui.toastContainer, translate("common.errorPrefix", `Error: ${error.message}`, { message: error.message }), "error");
             return false;
         } finally {
             button.style.pointerEvents = "auto";
@@ -225,7 +265,7 @@
         const method = note ? "PUT" : "DELETE";
 
         ui.btnSaveNote.disabled = true;
-        ui.btnSaveNote.textContent = "Saving...";
+        ui.btnSaveNote.textContent = translate("details.saving", "Saving...");
 
         try {
             const response = await fetchImpl(`/api/users/${session.userId}/movies/${movieId}/status/note`, {
@@ -235,18 +275,18 @@
             });
 
             if (response.ok) {
-                showToast(ui.toastContainer, "Note saved successfully");
+                showToast(ui.toastContainer, translate("details.noteSaved", "Note saved successfully"));
                 return true;
             }
 
-            showToast(ui.toastContainer, "Failed to save note", "error");
+            showToast(ui.toastContainer, translate("details.noteFailed", "Failed to save note"), "error");
             return false;
         } catch (error) {
-            showToast(ui.toastContainer, `Error: ${error.message}`, "error");
+            showToast(ui.toastContainer, translate("common.errorPrefix", `Error: ${error.message}`, { message: error.message }), "error");
             return false;
         } finally {
             ui.btnSaveNote.disabled = false;
-            ui.btnSaveNote.textContent = "Save Notes";
+            ui.btnSaveNote.textContent = translate("details.saveNotes", "Save Notes");
         }
     }
 
@@ -287,6 +327,18 @@
 
         setSessionUser(ui, session);
         bindActionButtons(fetchImpl, session, movieId, ui);
+        if (scope.window && doc?.body?.dataset.languageRerenderBound !== "true") {
+            doc.body.dataset.languageRerenderBound = "true";
+            scope.window.addEventListener(languageChangedEventName(), () => {
+                setSessionUser(ui, session);
+                if (lastRenderedMovie) {
+                    renderMovie(ui, lastRenderedMovie);
+                }
+                if (ui.btnSaveNote && !ui.btnSaveNote.disabled) {
+                    ui.btnSaveNote.textContent = translate("details.saveNotes", "Save Notes");
+                }
+            });
+        }
         await fetchMovieDetails(fetchImpl, session, movieId, ui);
 
         return { session, movieId, ui };

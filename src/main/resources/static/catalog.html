@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Catalog - MovieTrakk</title>
+    <title data-i18n="catalog.title">Catalog - MovieTrakk</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:wght@500;700;800&family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,1,0&display=swap" rel="stylesheet" />
@@ -13,54 +13,54 @@
     <header class="top-nav">
         <div class="brand-wrap">
             <h1>MovieTrakk</h1>
-            <p>Premium movie catalog</p>
+            <p data-i18n="catalog.subtitle">Premium movie catalog</p>
         </div>
         <div class="session-wrap">
-            <p class="session-line">Session: <strong id="session-user" data-session-user>Guest</strong></p>
+            <p class="session-line"><span data-i18n="common.session">Session:</span> <strong id="session-user" data-session-user>Guest</strong></p>
             <a href="/my-lists.html" class="nav-action">
                 <span class="material-symbols-outlined" aria-hidden="true">library_add</span>
-                <span>My Lists</span>
+                <span data-i18n="common.myLists">My Lists</span>
             </a>
             <button type="button" class="nav-action" id="go-admin-dashboard" data-admin-link hidden>
                 <span class="material-symbols-outlined" aria-hidden="true">admin_panel_settings</span>
-                <span>Admin</span>
+                <span data-i18n="common.admin">Admin</span>
             </button>
-            <button type="button" class="nav-action ghost" data-action="logout">Log out</button>
+            <button type="button" class="nav-action ghost" data-action="logout" data-i18n="common.logout">Log out</button>
         </div>
     </header>
 
     <div class="catalog-layout">
-        <aside class="filter-panel" aria-label="Catalog filters">
-            <p class="label-caps">Search Controls</p>
-            <h2>Find the next screening</h2>
+        <aside class="filter-panel" aria-label="Catalog filters" data-i18n-aria-label="catalog.filtersAria">
+            <p class="label-caps" data-i18n="catalog.searchControls">Search Controls</p>
+            <h2 data-i18n="catalog.findNext">Find the next screening</h2>
 
-            <label for="title">Title</label>
+            <label for="title" data-i18n="catalog.titleLabel">Title</label>
             <div class="input-wrap">
                 <span class="material-symbols-outlined" aria-hidden="true">search</span>
-                <input id="title" name="title" type="text" placeholder="Search by title..." />
+                <input id="title" name="title" type="text" placeholder="Search by title..." data-i18n-placeholder="catalog.titlePlaceholder" />
             </div>
 
-            <label for="genre">Genre</label>
+            <label for="genre" data-i18n="catalog.genreLabel">Genre</label>
             <div class="input-wrap">
                 <span class="material-symbols-outlined" aria-hidden="true">theaters</span>
                 <select id="genre" name="genre">
-                    <option value="all" selected>All genres</option>
-                    <option value="Action">Action</option>
-                    <option value="Adventure">Adventure</option>
-                    <option value="Comedy">Comedy</option>
-                    <option value="Drama">Drama</option>
-                    <option value="Fantasy">Fantasy</option>
-                    <option value="Horror">Horror</option>
-                    <option value="Noir">Noir</option>
-                    <option value="Sci-Fi">Sci-Fi</option>
-                    <option value="Thriller">Thriller</option>
+                    <option value="all" selected data-i18n="genres.all">All genres</option>
+                    <option value="Action" data-i18n="genres.Action">Action</option>
+                    <option value="Adventure" data-i18n="genres.Adventure">Adventure</option>
+                    <option value="Comedy" data-i18n="genres.Comedy">Comedy</option>
+                    <option value="Drama" data-i18n="genres.Drama">Drama</option>
+                    <option value="Fantasy" data-i18n="genres.Fantasy">Fantasy</option>
+                    <option value="Horror" data-i18n="genres.Horror">Horror</option>
+                    <option value="Noir" data-i18n="genres.Noir">Noir</option>
+                    <option value="Sci-Fi" data-i18n="genres.Sci-Fi">Sci-Fi</option>
+                    <option value="Thriller" data-i18n="genres.Thriller">Thriller</option>
                 </select>
             </div>
 
-            <label for="year">Year</label>
+            <label for="year" data-i18n="catalog.yearLabel">Year</label>
             <div class="input-wrap">
                 <span class="material-symbols-outlined" aria-hidden="true">calendar_today</span>
-                <input id="year" name="year" type="number" min="1800" max="2030" placeholder="e.g. 2024" />
+                <input id="year" name="year" type="number" min="1800" max="2030" placeholder="e.g. 2024" data-i18n-placeholder="catalog.yearPlaceholder" />
             </div>
 
             <p id="catalog-message" class="message" aria-live="polite"></p>
@@ -68,21 +68,22 @@
 
         <main class="catalog-main">
             <div class="main-head">
-                <h2>Movie Catalog</h2>
+                <h2 data-i18n="catalog.heading">Movie Catalog</h2>
             </div>
 
-            <section class="recommendations-section" id="recommendations-section" aria-label="Recommended movies" hidden>
+            <section class="recommendations-section" id="recommendations-section" aria-label="Recommended movies" data-i18n-aria-label="catalog.recommendationsAria" hidden>
                 <div class="section-head">
-                    <h2>Recommended for you</h2>
-                    <p>Based on movies you liked.</p>
+                    <h2 data-i18n="catalog.recommendationsHeading">Recommended for you</h2>
+                    <p data-i18n="catalog.recommendationsCopy">Based on movies you liked.</p>
                 </div>
                 <section id="recommendations-grid" class="catalog-grid recommendations-grid"></section>
             </section>
 
-            <section id="catalog-grid" class="catalog-grid" aria-label="Movie cards"></section>
+            <section id="catalog-grid" class="catalog-grid" aria-label="Movie cards" data-i18n-aria-label="catalog.cardsAria"></section>
         </main>
     </div>
 
+    <script src="/js/i18n.js"></script>
     <script src="/js/catalog.js"></script>
 </body>
 </html>

@@ -307,6 +307,38 @@ describe("catalog client logic", () => {
         expect(card.textContent).toContain("TBD");
     });
 
+    test("render helpers use i18n labels when available", () => {
+        const originalI18n = window.MovieI18n;
+        window.MovieI18n = {
+            t: jest.fn((key) => `tx:${key}`)
+        };
+
+        const grid = document.createElement("section");
+
+        try {
+            catalog.renderMovies(grid, [], false);
+            expect(grid.textContent).toContain("tx:catalog.empty");
+
+            catalog.renderMovies(grid, [{
+                id: 1,
+                title: "",
+                genre: "Action",
+                year: 0,
+                duration: 0,
+                synopsis: "",
+                posterUrl: ""
+            }], true);
+
+            expect(grid.textContent).toContain("tx:common.untitled");
+            expect(grid.textContent).toContain("tx:genres.Action");
+            expect(grid.textContent).toContain("tx:common.toBeDefined");
+            expect(grid.textContent).toContain("tx:catalog.edit");
+            expect(window.MovieI18n.t).toHaveBeenCalled();
+        } finally {
+            window.MovieI18n = originalI18n;
+        }
+    });
+
     test("recommendation helpers render recommended movies", async () => {
         const section = document.createElement("section");
         const grid = document.createElement("section");
@@ -554,6 +586,9 @@ describe("catalog client logic", () => {
         expect(document.getElementById("recommendations-section").hidden).toBe(false);
         expect(document.getElementById("recommendations-grid").textContent).toContain("Arrival");
         expect(document.getElementById("catalog-grid").textContent).toContain("Catalog Movie");
+
+        window.dispatchEvent(new Event("movietrakk:languagechange"));
+        expect(document.getElementById("recommendations-grid").textContent).toContain("Arrival");
     });
 
     test("catalog inline admin handles missing selections and server failures", async () => {
@@ -681,6 +716,8 @@ describe("catalog client logic", () => {
         await settle();
 
         expect(document.getElementById("admin-total").textContent).toBe("2");
+        expect(document.getElementById("admin-table-body").textContent).toContain("Arrival");
+        window.dispatchEvent(new Event("movietrakk:languagechange"));
         expect(document.getElementById("admin-table-body").textContent).toContain("Arrival");
 
         const search = document.getElementById("admin-search");
