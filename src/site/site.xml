@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="MovieTrakk">
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.12.0</version>
+    </skin>
+    <body>
+        <menu name="MovieTrakk">
+            <item name="Overview" href="index.html" />
+            <item name="API Documentation" href="api.html" />
+            <item name="Continuous Integration" href="ci.html" />
+            <item name="Doxygen" href="doxygen.html" />
+        </menu>
+        <menu ref="reports" />
+    </body>
+</project>

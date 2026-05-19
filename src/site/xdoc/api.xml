@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>API Documentation</title>
+    </properties>
+    <body>
+        <section name="OpenAPI">
+            <p>
+                The application exposes interactive Swagger/OpenAPI documentation at
+                <code>/swagger-ui.html</code> and the machine-readable OpenAPI document at
+                <code>/api-docs</code>.
+            </p>
+            <p>
+                The OpenAPI metadata is configured in
+                <code>com.bspq.e2.config.OpenApiConfig</code>, and controller operations
+                are annotated with summaries and descriptions.
+            </p>
+        </section>
+        <section name="Main Endpoint Groups">
+            <ul>
+                <li><code>/api/auth</code>: registration, login and user resolution.</li>
+                <li><code>/api/movies</code>: catalog search and admin movie management.</li>
+                <li><code>/api/users/{userId}/movies</code>: personal lists, notes and recommendations.</li>
+                <li><code>/api/me/stats</code>: personal activity statistics.</li>
+            </ul>
+        </section>
+    </body>
+</document>

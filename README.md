@@ -101,13 +101,20 @@ powershell -ExecutionPolicy Bypass -File .\scripts\verify-local.ps1
 
 ## Continuous Integration
 
-GitHub Actions runs the mandatory test suite on every push and pull request with:
+Jenkins is configured through the root `Jenkinsfile`. The pipeline checks out the
+repository, builds and tests the project, generates the Maven site and generates
+the Doxygen HTML/PDF documentation.
+
+GitHub Actions also runs the mandatory test suite on every push and pull request with:
 
 ```bash
 mvn -B clean test
 ```
 
 That command executes the Java/Spring tests, the Jest frontend tests and the configured coverage checks. ContiPerf remains a local/manual verification flow so the required CI check stays fast and stable.
+
+The documentation workflow generates the Maven site, Doxygen HTML and Doxygen PDF,
+then publishes the combined site through GitHub Pages.
 
 To require passing tests before merging pull requests, enable branch protection in GitHub under `Settings` -> `Branches` -> `Branch protection rules` and require the `Tests / test` status check.
 
@@ -143,6 +150,29 @@ The profiling script starts the application with the `profiling` profile, launch
 
 - Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 - OpenAPI JSON: [http://localhost:8080/api-docs](http://localhost:8080/api-docs)
+
+The OpenAPI metadata is configured in `OpenApiConfig`, and controller operations
+include Swagger summaries and descriptions.
+
+## Project Documentation
+
+```bash
+# Generate the Maven project site with reports
+mvn site
+
+# Generate Doxygen HTML and PDF on Windows
+powershell -ExecutionPolicy Bypass -File .\scripts\generate-doxygen.ps1
+
+# Generate Doxygen HTML and PDF on Unix systems
+./scripts/generate-doxygen.sh
+```
+
+The Maven site is generated in `target/site`. Doxygen HTML is generated in
+`target/doxygen/html`, and the Doxygen PDF is copied to
+`docs/doxygen/MovieTrakk-Doxygen.pdf`.
+
+GitHub Pages is configured by `.github/workflows/docs.yml` to publish the Maven
+site together with the Doxygen documentation.
 
 ## API Reference
 

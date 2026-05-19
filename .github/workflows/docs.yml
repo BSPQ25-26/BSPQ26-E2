@@ -1,0 +1,86 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+      - Alvaro
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Install Doxygen and LaTeX
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen graphviz latexmk texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
+
+      - name: Run tests and Maven site
+        run: mvn -B test site
+
+      - name: Generate Doxygen HTML and PDF
+        run: |
+          chmod +x scripts/generate-doxygen.sh
+          ./scripts/generate-doxygen.sh
+
+      - name: Assemble Pages site
+        run: |
+          mkdir -p public
+          cp -R target/site/. public/
+          mkdir -p public/doxygen
+          cp -R target/doxygen/html public/doxygen/html
+          cp docs/doxygen/MovieTrakk-Doxygen.pdf public/doxygen/MovieTrakk-Doxygen.pdf
+          cat > public/doxygen/index.html <<'HTML'
+          <!doctype html>
+          <html lang="en">
+            <head>
+              <meta charset="utf-8">
+              <meta http-equiv="refresh" content="0; url=html/index.html">
+              <title>MovieTrakk Doxygen</title>
+            </head>
+            <body>
+              <a href="html/index.html">MovieTrakk Doxygen documentation</a>
+            </body>
+          </html>
+          HTML
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: public
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

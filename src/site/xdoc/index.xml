@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <title>MovieTrakk Project Site</title>
+    </properties>
+    <body>
+        <section name="MovieTrakk">
+            <p>
+                MovieTrakk is a Spring Boot application for browsing a movie catalog,
+                tracking watched and watch-later lists, saving notes, managing preferences,
+                viewing recommendations and reviewing personal activity stats.
+            </p>
+            <p>
+                This Maven site integrates project information, unit test reports,
+                coverage reports, Java API documentation and links to the generated
+                Doxygen documentation.
+            </p>
+        </section>
+    </body>
+</document>
