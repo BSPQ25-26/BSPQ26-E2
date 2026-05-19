@@ -10,6 +10,14 @@
     const LEGACY_AUTH_SESSION_KEY = "movieTracker.session";
     const USER_ID_STORAGE_KEY = "movieTrakk.userId";
 
+    function translate(key, fallback, params = {}) {
+        const i18n = scope.window?.MovieI18n;
+        if (i18n && typeof i18n.t === "function") {
+            return i18n.t(key, { ...params, defaultValue: fallback });
+        }
+        return fallback;
+    }
+
     function readText(value) {
         return value === undefined || value === null ? "" : String(value).trim();
     }
@@ -52,8 +60,8 @@
         if (!response.ok) {
             const message = typeof data === "string"
                 ? data
-                : (data.message || "Request failed");
-            throw new Error(message || "Request failed");
+                : (data.message || translate("common.requestFailed", "Request failed"));
+            throw new Error(message || translate("common.requestFailed", "Request failed"));
         }
 
         return data;
@@ -124,7 +132,7 @@
             const payload = buildRegisterPayload(form);
 
             setButtonDisabled(button, true);
-            setMessage(message, "Creating account...", true);
+            setMessage(message, translate("auth.status.creatingAccount", "Creating account..."), true);
 
             try {
                 const responseText = await postJson(AUTH_ENDPOINTS.register, payload, fetchImpl);
@@ -156,13 +164,13 @@
             const payload = buildLoginPayload(form);
 
             setButtonDisabled(button, true);
-            setMessage(message, "Signing in...", true);
+            setMessage(message, translate("auth.status.signingIn", "Signing in..."), true);
 
             try {
                 const responseData = await postJson(AUTH_ENDPOINTS.login, payload, fetchImpl);
                 const serverMessage = typeof responseData === "string"
                     ? responseData
-                    : (responseData.message || "Login successful");
+                    : (responseData.message || translate("auth.status.loginSuccessful", "Login successful"));
                 const sessionUsername = typeof responseData === "object" && responseData.username
                     ? responseData.username
                     : (payload.username || "");
@@ -175,7 +183,7 @@
                 const redirectUrl = resolveLoginRedirect(sessionRole);
 
                 saveSession(sessionUserId, sessionUsername, sessionRole);
-                setMessage(message, `${serverMessage}. Redirecting...`, true);
+                setMessage(message, `${serverMessage}. ${translate("auth.status.redirecting", "Redirecting...")}`, true);
                 scope.window?.location?.assign(redirectUrl);
             } catch (error) {
                 setMessage(message, error.message, false);

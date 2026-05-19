@@ -122,6 +122,32 @@ describe("movie-details client logic", () => {
         expect(document.getElementById("error-message").textContent).toBe("Movie not found.");
     });
 
+    test("renderMovie uses i18n fallbacks when available", () => {
+        const originalI18n = window.MovieI18n;
+        window.MovieI18n = {
+            t: jest.fn((key) => `tx:${key}`)
+        };
+        setupDom();
+
+        try {
+            details.renderMovie(details.createUi(document), {
+                title: "",
+                genre: "Fantasy",
+                year: "",
+                duration: 0,
+                synopsis: "",
+                posterUrl: ""
+            });
+
+            expect(document.getElementById("movie-title").textContent).toBe("tx:common.untitled");
+            expect(document.getElementById("movie-genre").textContent).toBe("tx:genres.Fantasy");
+            expect(document.getElementById("movie-duration").textContent).toBe("tx:common.toBeDefined");
+            expect(window.MovieI18n.t).toHaveBeenCalled();
+        } finally {
+            window.MovieI18n = originalI18n;
+        }
+    });
+
     test("toast and session helpers support missing optional elements", () => {
         expect(() => details.showToast(null, "Ignored")).not.toThrow();
         expect(() => details.setSessionUser({ sessionUser: null }, null)).not.toThrow();
@@ -169,6 +195,8 @@ describe("movie-details client logic", () => {
         expect(document.getElementById("note-section-container").style.display).toBe("block");
         expect(document.getElementById("session-user").textContent).toContain("alice");
         expect(document.getElementById("user-note").value).toBe("Favorite Nolan film");
+        window.dispatchEvent(new Event("movietrakk:languagechange"));
+        expect(document.getElementById("movie-title").textContent).toBe("Interstellar");
     });
 
     test("fetchUserStatus and fetchMovieDetails handle non-ok and generic error branches", async () => {

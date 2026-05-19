@@ -18,6 +18,33 @@
         "Thriller"
     ];
 
+    function translate(key, fallback, params = {}) {
+        const i18n = scope.window?.MovieI18n;
+        if (i18n && typeof i18n.t === "function") {
+            return i18n.t(key, { ...params, defaultValue: fallback });
+        }
+        return fallback;
+    }
+
+    function genreTranslationKey(genre) {
+        const value = readText(genre);
+        return DEFAULT_GENRES.includes(value) ? `genres.${value}` : null;
+    }
+
+    function genreLabel(genre) {
+        const value = readText(genre);
+        const key = genreTranslationKey(value);
+        return key ? translate(key, value) : value;
+    }
+
+    function movieFallbackTitle(movie) {
+        return readText(movie?.title) || translate("common.untitled", "Untitled");
+    }
+
+    function languageChangedEventName() {
+        return scope.window?.MovieI18n?.LANGUAGE_CHANGED_EVENT || "movietrakk:languagechange";
+    }
+
     function readText(value) {
         return value === undefined || value === null ? "" : String(value).trim();
     }
@@ -101,8 +128,8 @@
         }
 
         if (!response.ok) {
-            const message = typeof data === "string" ? data : (data.message || "Request failed");
-            throw new Error(message || "Request failed");
+            const message = typeof data === "string" ? data : (data.message || translate("common.requestFailed", "Request failed"));
+            throw new Error(message || translate("common.requestFailed", "Request failed"));
         }
 
         return data;
@@ -144,17 +171,17 @@
 
     function movieDescription(movie) {
         const synopsis = readText(movie.synopsis);
-        return synopsis || "No synopsis available.";
+        return synopsis || translate("common.noSynopsis", "No synopsis available.");
     }
 
     function movieYear(movie) {
         const year = toNumberOrZero(movie.year);
-        return year > 0 ? String(year) : "N/A";
+        return year > 0 ? String(year) : translate("common.notAvailable", "N/A");
     }
 
     function movieDuration(movie) {
         const duration = toNumberOrZero(movie.duration);
-        return duration > 0 ? `${duration}m` : "TBD";
+        return duration > 0 ? `${duration}m` : translate("common.toBeDefined", "TBD");
     }
 
     function createPosterElement(movie) {
@@ -165,12 +192,14 @@
         if (posterUrl) {
             const image = document.createElement("img");
             image.src = posterUrl;
-            image.alt = `${readText(movie.title) || "Movie"} poster`;
+            image.alt = translate("common.posterAlt", `${movieFallbackTitle(movie)} poster`, {
+                title: movieFallbackTitle(movie)
+            });
             poster.append(image);
         } else {
             const fallback = document.createElement("div");
             fallback.className = "movie-poster-fallback";
-            fallback.textContent = "No Poster";
+            fallback.textContent = translate("common.noPoster", "No Poster");
             poster.append(fallback);
         }
 
@@ -186,14 +215,14 @@
         body.className = "movie-body";
 
         const title = document.createElement("h3");
-        title.textContent = readText(movie.title) || "Untitled";
+        title.textContent = movieFallbackTitle(movie);
 
         const meta = document.createElement("div");
         meta.className = "meta";
 
         const genre = document.createElement("span");
         genre.className = "genre";
-        genre.textContent = readText(movie.genre) || "Unknown";
+        genre.textContent = genreLabel(movie.genre) || translate("common.unknown", "Unknown");
 
         const year = document.createElement("span");
         year.className = "year";
@@ -219,14 +248,14 @@
             editButton.className = "action-button edit";
             editButton.dataset.action = "edit";
             editButton.dataset.movieId = String(movie.id);
-            editButton.textContent = "Edit";
+            editButton.textContent = translate("catalog.edit", "Edit");
 
             const deleteButton = document.createElement("button");
             deleteButton.type = "button";
             deleteButton.className = "action-button delete";
             deleteButton.dataset.action = "delete";
             deleteButton.dataset.movieId = String(movie.id);
-            deleteButton.textContent = "Delete";
+            deleteButton.textContent = translate("catalog.delete", "Delete");
 
             actions.append(editButton, deleteButton);
             body.append(actions);
@@ -247,7 +276,7 @@
         if (!Array.isArray(movies) || movies.length === 0) {
             const empty = document.createElement("article");
             empty.className = "movie-card empty";
-            empty.textContent = "No movies found for current filters.";
+            empty.textContent = translate("catalog.empty", "No movies found for current filters.");
             gridElement.append(empty);
             return;
         }
@@ -348,7 +377,7 @@
         const labels = document.querySelectorAll("#session-user, [data-session-user]");
         const text = session && session.username
             ? `${session.username} (${session.role || "USER"})`
-            : "Guest";
+            : translate("common.guest", "Guest");
 
         labels.forEach((label) => {
             label.textContent = text;
@@ -414,12 +443,14 @@
             modal.dataset.mode = mode;
         }
         if (title) {
-            title.textContent = isEdit ? "Edit Movie" : "Add New Movie";
+            title.textContent = isEdit
+                ? translate("admin.editMovie", "Edit Movie")
+                : translate("admin.addNewMovie", "Add New Movie");
         }
         if (label) {
             label.textContent = isEdit
-                ? `Movie #${movie?.id || ""}`
-                : "New catalog entry";
+                ? translate("admin.movieNumber", `Movie #${movie?.id || ""}`, { id: movie?.id || "" })
+                : translate("admin.newCatalogEntry", "New catalog entry");
         }
     }
 
@@ -431,7 +462,9 @@
         if (posterUrl) {
             const image = document.createElement("img");
             image.src = posterUrl;
-            image.alt = `${readText(movie.title) || "Movie"} poster`;
+            image.alt = translate("common.posterAlt", `${movieFallbackTitle(movie)} poster`, {
+                title: movieFallbackTitle(movie)
+            });
             wrapper.append(image);
         } else {
             const icon = document.createElement("span");
@@ -471,7 +504,7 @@
         const title = document.createElement("td");
         title.className = "table-title";
         const titleText = document.createElement("strong");
-        titleText.textContent = readText(movie.title) || "Untitled";
+        titleText.textContent = movieFallbackTitle(movie);
         const synopsis = document.createElement("span");
         synopsis.textContent = movieDescription(movie);
         title.append(titleText, synopsis);
@@ -479,7 +512,7 @@
         const genre = document.createElement("td");
         const genreChip = document.createElement("span");
         genreChip.className = "table-chip";
-        genreChip.textContent = readText(movie.genre) || "Unknown";
+        genreChip.textContent = genreLabel(movie.genre) || translate("common.unknown", "Unknown");
         genre.append(genreChip);
 
         const year = document.createElement("td");
@@ -494,8 +527,8 @@
 
         if (adminMode) {
             actions.append(
-                createIconButton("edit", "edit", `Edit ${readText(movie.title) || "movie"}`, movie.id),
-                createIconButton("delete", "delete", `Delete ${readText(movie.title) || "movie"}`, movie.id)
+                createIconButton("edit", "edit", translate("catalog.edit", "Edit") + ` ${movieFallbackTitle(movie) || translate("common.movieLower", "movie")}`, movie.id),
+                createIconButton("delete", "delete", translate("catalog.delete", "Delete") + ` ${movieFallbackTitle(movie) || translate("common.movieLower", "movie")}`, movie.id)
             );
         }
 
@@ -523,7 +556,10 @@
         tableBody.innerHTML = "";
 
         if (!Array.isArray(movies) || movies.length === 0) {
-            tableBody.append(createEmptyTableRow("No movies found", "Adjust filters or add a new movie."));
+            tableBody.append(createEmptyTableRow(
+                translate("admin.noMoviesFound", "No movies found"),
+                translate("admin.adjustFilters", "Adjust filters or add a new movie.")
+            ));
             return;
         }
 
@@ -554,13 +590,18 @@
 
             const allOption = document.createElement("option");
             allOption.value = "all";
-            allOption.textContent = "All genres";
+            allOption.dataset.i18n = "genres.all";
+            allOption.textContent = translate("genres.all", "All genres");
             filter.append(allOption);
 
             genres.forEach((genre) => {
                 const option = document.createElement("option");
                 option.value = genre;
-                option.textContent = genre;
+                const key = genreTranslationKey(genre);
+                if (key) {
+                    option.dataset.i18n = key;
+                }
+                option.textContent = genreLabel(genre);
                 filter.append(option);
             });
 
@@ -640,13 +681,13 @@
             genreElement.textContent = String(genres.size);
         }
         if (latestElement) {
-            latestElement.textContent = validYears.length ? String(Math.max(...validYears)) : "N/A";
+            latestElement.textContent = validYears.length ? String(Math.max(...validYears)) : translate("common.notAvailable", "N/A");
         }
         if (durationElement) {
             const average = validDurations.length
                 ? Math.round(validDurations.reduce((sum, value) => sum + value, 0) / validDurations.length)
                 : 0;
-            durationElement.textContent = average ? `${average}m` : "N/A";
+            durationElement.textContent = average ? `${average}m` : translate("common.notAvailable", "N/A");
         }
     }
 
@@ -662,11 +703,15 @@
 
         if (range) {
             if (!total) {
-                range.textContent = "No entries";
+                range.textContent = translate("admin.noEntries", "No entries");
             } else {
                 const start = (state.page - 1) * state.pageSize + 1;
                 const end = Math.min(start + state.pageSize - 1, total);
-                range.textContent = `Showing ${start} to ${end} of ${total} entries`;
+                range.textContent = translate("admin.showingEntries", `Showing ${start} to ${end} of ${total} entries`, {
+                    start,
+                    end,
+                    total
+                });
             }
         }
 
@@ -868,7 +913,8 @@
                 genre: "all",
                 year: ""
             },
-            movies: []
+            movies: [],
+            recommendations: []
         };
 
         async function reloadMovies() {
@@ -884,12 +930,19 @@
 
         async function loadRecommendations() {
             try {
-                const movies = await fetchRecommendations(session?.userId);
-                renderRecommendations(recommendationsSection, recommendationsGrid, movies);
+                state.recommendations = await fetchRecommendations(session?.userId);
+                renderRecommendations(recommendationsSection, recommendationsGrid, state.recommendations);
             } catch (_) {
+                state.recommendations = [];
                 renderRecommendations(recommendationsSection, recommendationsGrid, []);
             }
         }
+
+        scope.window?.addEventListener(languageChangedEventName(), () => {
+            updateSessionUi(session);
+            renderMovies(gridElement, state.movies, inlineAdminMode);
+            renderRecommendations(recommendationsSection, recommendationsGrid, state.recommendations);
+        });
 
         titleInput?.addEventListener("input", () => {
             state.filters.title = titleInput.value;
@@ -916,13 +969,13 @@
                 const movieId = Number.parseInt(button.dataset.movieId || "", 10);
                 const movie = findMovieById(state.movies, movieId);
                 if (!movie) {
-                    setStatus(adminMessage, "Movie not found", true);
+                    setStatus(adminMessage, translate("admin.movieNotFound", "Movie not found"), true);
                     return;
                 }
 
                 if (button.dataset.action === "edit") {
                     fillAdminForm(adminForm, movie);
-                    setStatus(adminMessage, `Editing movie #${movieId}`, false);
+                    setStatus(adminMessage, translate("admin.editingMovie", `Editing movie #${movieId}`, { id: movieId }), false);
                     return;
                 }
 
@@ -932,7 +985,9 @@
                             method: "DELETE",
                             headers: adminHeaders(session)
                         });
-                        setStatus(adminMessage, `Movie #${movieId} deleted`, false);
+                        setStatus(adminMessage, translate("admin.deletedMovie", `Movie #${movieId} deleted`, {
+                            title: translate("admin.movieNumber", `Movie #${movieId}`, { id: movieId })
+                        }), false);
                         await reloadMovies();
                     } catch (error) {
                         setStatus(adminMessage, error.message, true);
@@ -946,7 +1001,7 @@
                 const movieId = Number.parseInt(idValue, 10);
 
                 if (!movieId) {
-                    setStatus(adminMessage, "Select a movie to edit", true);
+                    setStatus(adminMessage, translate("admin.selectMovieToEdit", "Select a movie to edit"), true);
                     return;
                 }
 
@@ -957,7 +1012,9 @@
                         headers: adminHeaders(session),
                         body: JSON.stringify(payload)
                     });
-                    setStatus(adminMessage, `Movie #${movieId} updated`, false);
+                    setStatus(adminMessage, translate("admin.updatedMovie", `Movie #${movieId} updated`, {
+                        title: translate("admin.movieNumber", `Movie #${movieId}`, { id: movieId })
+                    }), false);
                     await reloadMovies();
                 } catch (error) {
                     setStatus(adminMessage, error.message, true);
@@ -1027,8 +1084,11 @@
             renderAdminStats([]);
             renderAdminPagination(state, 0);
             tableBody.innerHTML = "";
-            tableBody.append(createEmptyTableRow("Admin access required", "Log in with an admin account to manage movies."));
-            setStatus(elements.catalogMessage, "Admin role required to access this page.", true);
+            tableBody.append(createEmptyTableRow(
+                translate("admin.accessRequired", "Admin access required"),
+                translate("admin.loginAdmin", "Log in with an admin account to manage movies.")
+            ));
+            setStatus(elements.catalogMessage, translate("admin.roleRequired", "Admin role required to access this page."), true);
             return true;
         }
 
@@ -1116,6 +1176,19 @@
         bindAdminFilters(state, elements, adminMode);
         bindAdminPagination(state, elements, adminMode);
 
+        scope.window?.addEventListener(languageChangedEventName(), () => {
+            updateSessionUi(session);
+            populateGenreControls(state.movies);
+            renderAdminDashboard(state, elements, adminMode);
+
+            const mode = elements.modalElement?.dataset.mode;
+            if (mode) {
+                const movieId = elements.adminForm?.querySelector("#admin-movie-id")?.value;
+                const movie = movieId ? findMovieById(state.movies, movieId) : null;
+                setModalMode(mode, movie);
+            }
+        });
+
         tableBody.addEventListener("click", async (event) => {
             const button = event.target.closest("button[data-action]");
             if (!button) {
@@ -1125,7 +1198,7 @@
             const movieId = button.dataset.movieId || "";
             const movie = findMovieById(state.movies, movieId);
             if (!movie) {
-                setStatus(elements.catalogMessage, "Movie not found", true);
+                setStatus(elements.catalogMessage, translate("admin.movieNotFound", "Movie not found"), true);
                 return;
             }
 
@@ -1136,12 +1209,13 @@
 
             if (button.dataset.action === "delete") {
                 try {
-                    setStatus(elements.catalogMessage, `Deleting ${readText(movie.title) || "movie"}...`, false);
+                    const title = movieFallbackTitle(movie) || translate("common.movieLower", "movie");
+                    setStatus(elements.catalogMessage, translate("admin.deletingMovie", `Deleting ${title}...`, { title }), false);
                     await requestJson(`${MOVIES_ENDPOINT}/${movieId}`, {
                         method: "DELETE",
                         headers: adminHeaders(session)
                     });
-                    await reloadMovies(`Deleted ${readText(movie.title) || "movie"}`);
+                    await reloadMovies(translate("admin.deletedMovie", `Deleted ${title}`, { title }));
                 } catch (error) {
                     setStatus(elements.catalogMessage, error.message, true);
                 }
@@ -1155,7 +1229,7 @@
                 if (typeof elements.adminForm.reportValidity === "function") {
                     elements.adminForm.reportValidity();
                 }
-                setStatus(elements.adminMessage, "Complete the required movie fields.", true);
+                setStatus(elements.adminMessage, translate("admin.completeRequired", "Complete the required movie fields."), true);
                 return;
             }
 
@@ -1164,7 +1238,7 @@
             const payload = formToMovie(elements.adminForm);
 
             if (!payload.title || !payload.genre || !payload.year || !payload.duration) {
-                setStatus(elements.adminMessage, "Title, genre, year, and duration are required.", true);
+                setStatus(elements.adminMessage, translate("admin.requiredPayload", "Title, genre, year, and duration are required."), true);
                 return;
             }
 
@@ -1177,14 +1251,14 @@
                         headers: adminHeaders(session),
                         body: JSON.stringify(payload)
                     });
-                    await reloadMovies(`Updated ${payload.title}`);
+                    await reloadMovies(translate("admin.updatedMovie", `Updated ${payload.title}`, { title: payload.title }));
                 } else {
                     await requestJson(MOVIES_ENDPOINT, {
                         method: "POST",
                         headers: adminHeaders(session),
                         body: JSON.stringify(payload)
                     });
-                    await reloadMovies(`Created ${payload.title}`);
+                    await reloadMovies(translate("admin.createdMovie", `Created ${payload.title}`, { title: payload.title }));
                 }
 
                 closeAdminModal(elements.modalElement);

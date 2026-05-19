@@ -93,6 +93,43 @@ describe("auth client logic", () => {
             .toThrow("Denied");
     });
 
+    test("auth status messages use i18n when available", async () => {
+        const originalI18n = window.MovieI18n;
+        window.MovieI18n = {
+            t: jest.fn((key) => `tx:${key}`)
+        };
+
+        document.body.innerHTML = `
+            <form id="login-form">
+                <input name="username" value="viewer" />
+                <input name="password" value="secret" />
+                <button type="submit">Send</button>
+            </form>
+            <p id="login-message"></p>
+        `;
+
+        const fetchMock = jest.fn().mockResolvedValue(jsonResponse(200, {
+            userId: 3,
+            username: "viewer",
+            role: "USER"
+        }));
+
+        try {
+            auth.bindLoginForm(document, fetchMock);
+            document.getElementById("login-form").dispatchEvent(new Event("submit", {
+                bubbles: true,
+                cancelable: true
+            }));
+            await settle();
+
+            expect(document.getElementById("login-message").textContent)
+                .toContain("tx:auth.status.redirecting");
+            expect(window.MovieI18n.t).toHaveBeenCalledWith("auth.status.signingIn", expect.any(Object));
+        } finally {
+            window.MovieI18n = originalI18n;
+        }
+    });
+
     test("postJson supports json errors and header-less responses", async () => {
         const fetchMock = jest.fn()
             .mockResolvedValueOnce({

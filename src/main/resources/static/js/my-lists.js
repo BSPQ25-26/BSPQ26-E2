@@ -12,6 +12,45 @@
         liked: "liked",
         disliked: "disliked"
     };
+    const DEFAULT_GENRES = [
+        "Action",
+        "Adventure",
+        "Comedy",
+        "Drama",
+        "Fantasy",
+        "Horror",
+        "Noir",
+        "Sci-Fi",
+        "Thriller"
+    ];
+    let lastRenderedMovies = [];
+
+    function translate(key, fallback, params = {}) {
+        const i18n = scope.window?.MovieI18n;
+        if (i18n && typeof i18n.t === "function") {
+            return i18n.t(key, { ...params, defaultValue: fallback });
+        }
+        return fallback;
+    }
+
+    function languageChangedEventName() {
+        return scope.window?.MovieI18n?.LANGUAGE_CHANGED_EVENT || "movietrakk:languagechange";
+    }
+
+    function genreTranslationKey(genre) {
+        const value = readText(genre);
+        return DEFAULT_GENRES.includes(value) ? `genres.${value}` : null;
+    }
+
+    function genreLabel(genre) {
+        const value = readText(genre);
+        const key = genreTranslationKey(value);
+        return key ? translate(key, value) : value;
+    }
+
+    function movieFallbackTitle(movie) {
+        return readText(movie?.title) || translate("common.untitled", "Untitled");
+    }
 
     function readText(value) {
         return value === undefined || value === null ? "" : String(value).trim();
@@ -72,8 +111,8 @@
         }
 
         if (!response.ok) {
-            const message = typeof data === "string" ? data : (data.message || "Request failed");
-            throw new Error(message || "Request failed");
+            const message = typeof data === "string" ? data : (data.message || translate("common.requestFailed", "Request failed"));
+            throw new Error(message || translate("common.requestFailed", "Request failed"));
         }
 
         return data;
@@ -81,17 +120,17 @@
 
     function movieDescription(movie) {
         const synopsis = readText(movie.synopsis);
-        return synopsis || "No synopsis available.";
+        return synopsis || translate("common.noSynopsis", "No synopsis available.");
     }
 
     function movieYear(movie) {
         const year = toNumberOrZero(movie.year);
-        return year > 0 ? String(year) : "N/A";
+        return year > 0 ? String(year) : translate("common.notAvailable", "N/A");
     }
 
     function movieDuration(movie) {
         const duration = toNumberOrZero(movie.duration);
-        return duration > 0 ? `${duration}m` : "TBD";
+        return duration > 0 ? `${duration}m` : translate("common.toBeDefined", "TBD");
     }
 
     function createPosterElement(movie) {
@@ -102,12 +141,14 @@
         if (posterUrl) {
             const image = document.createElement("img");
             image.src = posterUrl;
-            image.alt = `${readText(movie.title) || "Movie"} poster`;
+            image.alt = translate("common.posterAlt", `${movieFallbackTitle(movie)} poster`, {
+                title: movieFallbackTitle(movie)
+            });
             poster.append(image);
         } else {
             const fallback = document.createElement("div");
             fallback.className = "movie-poster-fallback";
-            fallback.textContent = "No Poster";
+            fallback.textContent = translate("common.noPoster", "No Poster");
             poster.append(fallback);
         }
 
@@ -123,14 +164,14 @@
         body.className = "movie-body";
 
         const title = document.createElement("h3");
-        title.textContent = readText(movie.title) || "Untitled";
+        title.textContent = movieFallbackTitle(movie);
 
         const meta = document.createElement("div");
         meta.className = "meta";
 
         const genre = document.createElement("span");
         genre.className = "genre";
-        genre.textContent = readText(movie.genre) || "Unknown";
+        genre.textContent = genreLabel(movie.genre) || translate("common.unknown", "Unknown");
 
         const year = document.createElement("span");
         year.className = "year";
@@ -157,12 +198,13 @@
     }
 
     function renderMovies(gridElement, movies) {
+        lastRenderedMovies = Array.isArray(movies) ? movies : [];
         gridElement.innerHTML = "";
 
         if (!Array.isArray(movies) || movies.length === 0) {
             const empty = document.createElement("article");
             empty.className = "movie-card empty";
-            empty.textContent = "No movies in this list.";
+            empty.textContent = translate("lists.empty", "No movies in this list.");
             gridElement.append(empty);
             return;
         }
@@ -189,7 +231,7 @@
         const labels = document.querySelectorAll("#session-user, [data-session-user]");
         const text = session && session.username
             ? `${session.username} (${session.role || "USER"})`
-            : "Guest";
+            : translate("common.guest", "Guest");
 
         labels.forEach((label) => {
             label.textContent = text;
@@ -347,7 +389,7 @@
             const normalizedListType = LIST_ENDPOINTS[listType] || "watched";
             const normalizedUserId = normalizeUserId(userId);
             if (!normalizedUserId) {
-                throw new Error("Invalid user session. Please log in again.");
+                throw new Error(translate("lists.invalidSession", "Invalid user session. Please log in again."));
             }
             const endpoint = `/api/users/${normalizedUserId}/movies/${normalizedListType}`;
             const data = await requestJson(endpoint);
@@ -355,7 +397,10 @@
         } catch (error) {
             setStatus(
                 document.getElementById("status-message"),
-                `Error loading ${listType} list: ${error?.message || "Unknown error"}`,
+                translate("lists.loadingError", `Error loading ${listType} list: ${error?.message || "Unknown error"}`, {
+                    listType,
+                    message: error?.message || translate("lists.unknownError", "Unknown error")
+                }),
                 true
             );
             return [];
@@ -387,14 +432,14 @@
     async function loadAndDisplayList(listType) {
         const session = await ensureSessionUserId(getSessionInfo());
         if (!session || !session.userId) {
-            setStatus(document.getElementById("status-message"), "Your session is outdated. Please log in again.", true);
+            setStatus(document.getElementById("status-message"), translate("lists.outdatedSession", "Your session is outdated. Please log in again."), true);
             return;
         }
 
         const movies = await loadMovieList(session.userId, listType);
         const grid = document.getElementById("catalog-grid");
         if (!grid) {
-            setStatus(document.getElementById("status-message"), "Movies area not found in page.", true);
+            setStatus(document.getElementById("status-message"), translate("lists.moviesAreaMissing", "Movies area not found in page."), true);
             return;
         }
         renderMovies(grid, movies);
@@ -403,7 +448,7 @@
     async function initPage() {
         const session = await ensureSessionUserId(getSessionInfo());
         if (!session || !session.userId) {
-            setStatus(document.getElementById("status-message"), "Your session is outdated. Please log in again.", true);
+            setStatus(document.getElementById("status-message"), translate("lists.outdatedSession", "Your session is outdated. Please log in again."), true);
             return;
         }
 
@@ -412,6 +457,16 @@
         bindAdminDashboardAction();
         toggleAdminLinks(isAdminSession(session));
         bindTabButtons();
+        if (scope.window && document.body?.dataset.languageRerenderBound !== "true") {
+            document.body.dataset.languageRerenderBound = "true";
+            scope.window.addEventListener(languageChangedEventName(), () => {
+                updateSessionUi(getSessionInfo());
+                const grid = document.getElementById("catalog-grid");
+                if (grid) {
+                    renderMovies(grid, lastRenderedMovies);
+                }
+            });
+        }
         await loadAndDisplayList("watched");
     }
 
